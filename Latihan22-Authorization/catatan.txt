@@ -1,0 +1,161 @@
+Gate()
+adalah fitur yang disediakan oleh Laravel untuk mengontrol akses ke rute dan data dalam aplikasi Anda. Dengan menggunakan Gate, 
+Anda dapat mengatur aturan yang menentukan apakah pengguna tertentu diizinkan untuk mengakses sumber daya tertentu misal kita tidak mau menampilkan 
+menu category jika bukan admin,nah untuk melakukan itu tidak bisa mengunakan midleware karena midleware hanya akan 
+berfungsi untuk link. atau gampangnya gate bisa diakses atau ditempatkan dimana saja di .blade.php untuk menghilanggkan tag html 
+yang tidak akan dipakai jika bukan admin
+
+
+=================================================================================================
+
+Menambahkan Menu Category 
+
+menu ini hanya akan dimiliki oleh admin,jadi user yang bukan admin tidak akan bisa melihatnya,fungsinya 
+adalah untuk membuat category baru tanpa masuk kedalam phpmyAdmin/db nya. caranya :
+
+
+1. membuat controller baru untuk mengelola category 
+
+- buat controller baru 
+klik (CTRL+SHIFT+P) , make:controller , namanya adalah AdminCategoryController , pilih resource , pilih hubungkan 
+ke dalam models Category
+
+
+
+- buka web.php dan buat routenya :
+Route::resource('/dashboard/categories',AdminCategoryController::class) ; 
+
+
+
+
+- matikan show yang ada resource,karena tidak akan terpakai caranya menambahkan code ini pada routenya :	
+->except('show') ;
+
+full code : 
+Route::resource('/dashboard/categories',AdminCategoryController::class)->except('show') ; 
+
+
+
+
+- mencegah agar user yang belum login tidak dapat mengaakses link http://127.0.0.1:8000/dashboard/categories dengan cara 
+menambahkan middleware('auth') dan ini full code nya :
+Route::resource('/dashboard/categories',AdminCategoryController::class)->except('show')->middleware('auth') ; 
+
+
+
+
+
+2. membuat tampilan menu category
+
+- buka file sidebar.blade.php 
+
+
+
+
+- tambahkan code ini diluar ul yang pertama (diluar dashboard dan my post) dengan cara membuat ul baru contoh code : 
+{{-- category for admin  --}}
+        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+            <span>Administrator</span>
+        </h6>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {{ Request::is('dashboard/categories*') ? 'active' : '' }}" href="/dashboard/categories">
+                    <span data-feather="grid"></span>
+                    Post Categories
+                    </a>
+            </li>
+        </ul>
+{{-- akhir category for admin  --}}
+
+
+
+
+
+- perbaiki agar tampilan nya mengarah ke halaman view, buka AdminCategoryController dan masuk ke method index,
+ganti code sebelumnya dengan ini : 
+public function index()
+    {
+        return view('dashboard.categories.index',[
+            'categories' => Category::all()
+        ]) ; 	// ini yang harus ditambahkan 
+    }
+
+
+
+
+- buat folder categories didalam folder dashboard dan buat file index.blade.php 
+
+
+
+- copy kan code index yang dipunyai oleh dashboard/post ke dalam categories/index
+
+
+
+
+
+==========================================================================================
+
+
+menambahkan admin baru,agar yang bisa login sebagai admin bukan hanya bayu,caranya :
+
+untuk membuatnya adalah dengan cara menambahkan field baru yang bernama is_admin, dan isi datanya adalah booelan jika 
+bernilai true maka akan bisa login sebagai admin. tapi akan membuat migrasi baru agar tidak melakukan migrate:fresh lagi ,
+karena data sebelumnya sudah banyak 
+
+
+
+- buat migration baru dengan cara : 
+CTRL+SHIFT+P , make:migration , berikan namanya add_is_admin_to_users_table, No , Yes ,users
+
+
+
+- buka file tadi yang telah dibuat,masuk ke method up() dan berikan code ini :
+ public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->boolean('is_admin')->default(false) ; 
+        });
+    }
+
+
+
+- buka method down() siapa tau butuh rollback :
+public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('is_admin') ; 
+        });
+    }
+
+
+
+
+- jalankan migrasi nya dengan cara :
+php artisan migrate
+
+
+
+
+- buka AppServiceProvider.php dan ganti code sebelumnya dengan code ini :
+
+Gate::define('admin', function (User $user) {
+            return $user->is_admin ; 
+        }) ;
+
+
+
+
+- buka file is_admin.php dan ganti logic nya dengan ini :
+	//mengecek ada user yang login tidak
+        if (Auth::guest()) {
+            abort(403) ; //jika ada user yang belum login maka tampilkan 403 atau eror agar tidak dapat mengakses halaman dashboard/categories 
+        } 
+
+        //mengecek apakah yang login bayuaji@gmail.com atau bukan
+        if (!Auth::user()->is_admin) {
+            abort(403) ; //jika yang login bukan bayu maka akan diarahkan ke file eror
+        }
+
+
+
+

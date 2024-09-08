@@ -1,0 +1,117 @@
+1. diffForHumans()  :
+
+di Laravel digunakan untuk mendapatkan representasi waktu yang lebih manusiawi, seperti "2 hours ago" atau "3 days from now", dari objek tanggal 
+dan waktu. Metode ini biasanya digunakan pada objek Carbon, yang merupakan kelas untuk manipulasi tanggal dan waktu yang disediakan oleh Laravel 
+(dibangun di atas pustaka Carbon).
+misal membuat suatu postingan pada jam 09.00 dan sekarang jam 09.10, maka yang akan tampil 10 min ago 
+
+
+
+
+2. skip()
+digunakan untuk melewatkan sejumlah elemen dari sebuah koleksi (collection) atau hasil query dan melanjutkan pemrosesan pada elemen-elemen berikutnya.
+contoh : 
+ada posts yang isinya postingan berjumlah 20 dan akan diubah menjadi post agar bisa ditampilkan satu-satu jika misal mengunakan skip(1) maka data 
+tersebut akan diskip sebanyak 1 kali jadi langsung loncat ke data 2 
+
+
+
+
+3. implode()
+untuk menggabungkan elemen-elemen dari sebuah array menjadi sebuah string. Setiap elemen array akan digabungkan dengan 
+menggunakan delimiter (pemisah) yang ditentukan.
+
+
+
+
+4. pada faker ada fungsi yang namanya paragraphs sama seperti paragraph menghasilkan text random yang dapat dijadikan paragraph, tapi bedanya jika kita
+mengunakan paragraphs maka nilai yang akan dikembalikan akan berbentuk array 
+
+
+
+
+5. map()
+Di Laravel, terutama dalam konteks koleksi (Collection), metode map() digunakan untuk menerapkan suatu fungsi atau operasi ke setiap 
+elemen dalam koleksi dan mengembalikan koleksi baru yang berisi hasil dari operasi tersebut. Ini mirip dengan fungsi array_map() di PHP 
+tetapi lebih kaya fitur dan terintegrasi dengan baik dalam ekosistem Laravel.
+contoh pengunaan :
+
+//data acak akan diperoleh dari faker->paragraphs dan akan disimpan sebagai array
+//dibuat collect agar menjadi array sakti 
+//map dilakukan untuk melakukan tambahan yaitu menambahkan tag p pada setiap elemen array yang telah diperoleh dari faker 
+//$p merepresentasikan data yang ada di sebuah array yang telah di collect 
+//tapi masih dalam bentuk array,agar menjadi string maka lakukan implode dengan pemisahnya adalah ""
+            
+'body' => collect($this->faker->paragraphs(mt_rand(5,10)))
+                 ->map(function($p){
+                             return "<p> $p </p>" ; 
+                      	}) 
+                 ->implode('')
+
+
+jika masih bingung begini alurnya :
+a. faker->paragraphs(mt_rand(5,10))
+- faker mencari kata random yang berbentuk array karena mengunakan faker paragraphs dalam rentang 5 - 10 paragraph 
+- diperoleh lah text yang berupa [ayam , ayam2 , ayam3 , ayam4 , ayam5 , ayam6] kenapa array?karena mengunakan faker paragraphs bukan faker paragraph
+
+b. collect($this->faker->paragraphs(mt_rand(5,10)))
+- data tersebut akan ditambahkan tag <p> </p> pada setiap index yg ada di array tersebut mengunakan map() tapi tidak bisa langsung harus dibungkus collect 
+
+c.  collect($this->faker->paragraphs(mt_rand(5,10)))
+                 ->map(function($p){
+                             return "<p> $p </p>" ; 
+                      	}) 
+
+- $p merepresentasikan sebuah index yaitu ayam,ayam2...
+-  setelah dilakukan map maka hasilnya akan berbuah [<p>ayam</p> , <p>ayam2</p> , <p>ayam3</p> , <p>ayam4</p> , <p>ayam5</p> , <p>ayam6</p>]  
+- tapi masih berbentuk array,lantas bagaimana agar menjadi string? mengunakan implode 
+
+
+d. 'body' => collect($this->faker->paragraphs(mt_rand(5,10)))
+                 ->map(function($p){
+                             return "<p> $p </p>" ; 
+                      	}) 
+                 ->implode('')
+
+- kutip pada implode menandakan pemisah jika diisi kutip('') maka tidak ada pemisahnya maka yang akan terjadi adalah :
+<p>ayam</p><p>ayam2</p><p>ayam3</p><p>ayam4</p><p>ayam5</p><p>ayam6</p>
+
+- jika ketika implode diisikan sama dengan(=) contoh implode('=') maka yang akan terjadi : 
+<p>ayam</p>=<p>ayam2</p>=<p>ayam3</p>=<p>ayam4</p>=<p>ayam5</p>=<p>ayam6</p>
+
+
+
+
+
+
+6. img-fluid pada bootsrap 
+img-fluid adalah kelas CSS di Bootstrap yang digunakan untuk membuat gambar menjadi responsif. Ketika kelas img-fluid diterapkan pada elemen <img>, 
+gambar tersebut akan secara otomatis menyesuaikan ukurannya agar sesuai dengan lebar elemen induknya (container). Ini berguna untuk memastikan gambar 
+tetap terlihat baik pada berbagai ukuran layar dan perangkat.
+contoh :
+<img src="img2.jpg" class="img-fluid">
+
+pada vanila css atau css biasa :
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+
+
+
+
+7. Request::path()
+adalah metode statis dari kelas Illuminate\Http\Request yang digunakan untuk mendapatkan path URI dari permintaan HTTP saat ini. Ini mengembalikan 
+bagian path dari URL yang diminta, tanpa domain atau query string.
+
+Contoh Penggunaan : 
+Misalkan Anda memiliki URL berikut: http://example.com/products/123.
+
+Jika Anda menggunakan Request::path() di dalam aplikasi Laravel, hasilnya akan menjadi products/123.
+
+
+
+
+
+

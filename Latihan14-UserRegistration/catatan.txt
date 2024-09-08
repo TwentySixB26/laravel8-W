@@ -1,0 +1,175 @@
+PEMBAHASAN :
+
+CSRF (Cross-Site Request Forgery)
+mekanisme keamanan yang mencegah serangan di mana seorang pengguna secara tidak sadar melakukan tindakan
+yang tidak diinginkan pada aplikasi web. Serangan CSRF terjadi ketika penyerang membuat permintaan palsu yang 
+tampak sah ke server aplikasi web, menggunakan kredensial otentikasi pengguna yang sudah ada (seperti cookie sesi).
+
+
+is-invalid 
+memunculkan warna merah pada input 
+
+
+@error('name') //isi @enderror
+untuk mengecek jika terjadi eror apa yang ingin dimunculkan
+
+
+
+{{ $message }} 
+adalah suatu fungsi yang akan memberi tau eror apa yg terjadi 
+
+
+old('name')
+digunakan untuk agar ketika user mengisi input dan salah, lalu ingin mencoba mengisi kembali maka datanya tidak di reset contoh code:
+- value="{{ old('name')
+- penerapan full version :
+<input type="text" name="name" class="form-control rounded-top @error('name') is-invalid @enderror " id="name" placeholder="name" required value="{{ old('name') }}//contohnya">
+
+
+flash()
+digunakan untuk menyimpan data ke dalam session hanya untuk satu permintaan HTTP berikutnya. 
+Ini sering digunakan untuk menampilkan pesan notifikasi, seperti pesan sukses atau kesalahan, yang muncul setelah pengalihan
+(redirect) dan kemudian menghilang setelah halaman berikutnya dimuat.
+
+
+
+has()
+digunakan dalam konteks Eloquent untuk memeriksa apakah sebuah relasi tertentu ada di model.
+
+
+
+Validate()
+pada Laravel digunakan untuk memvalidasi data yang dikirimkan dari request sebelum data tersebut digunakan lebih lanjut, 
+seperti sebelum disimpan ke dalam database.
+
+
+
+===========================================================================================
+
+
+membuat route dan method register 
+
+1. untuk route di file web.php nya adalah memakai post bukan get seperti ini :
+Route::post('/register' , [RegisterController::class,'store']) ;
+
+2. route akan mengarahkan ke folder controller yang bernama RegisterController dan memangil method store :
+public function store(Request $request){
+        return $request->all() ; 
+    }
+artinya memangil semua request yang ada didalam input
+
+
+=======================================================================================
+
+
+CSRF (Cross-Site Request Forgery)
+
+untuk menjaganya adalah mengunakan Preventing CSRF Requests yaitu adalah user hanya akan bisa mengirim data melalui website
+yang sudah disediakan oleh kita, bukan lewat form orang lain caranya adalah : 
+
+1. menambahkan code ini didalam tag form 
+@csrf
+
+
+
+
+========================================================================================
+
+contoh form validation atau ketentuan agar bisa mengisikan form pada registrationController di method store :
+$request->validate([
+            'name' => 'required|max:255',
+            'username' => 'required|unique:users|min:3|max:255' ,
+            'email' => 'required|email:dns|unique:users' ,
+            'password' => 'required|min:5|max:255'
+        ]) ;
+
+
+
+dan tulis juga code ini ketika code berhasil lolos validasi :
+dd('registrasi berhasil') ;
+
+
+========================================================================================
+
+cara mengatasi eror pada input atau data gagal diisi 
+
+1 . untuk memberi efect warna merah ketika input gagal diisi atau eror tambahkan :
+is-invalid 
+simpan pada class yang ada di input, maka akan muncul warna merah di input
+
+
+2. cara agar is-invalid dieksekusi hanya ketika input eror maka bungkus dengan tag @error seperti ini :
+@error('name') is-invalid @enderror
+//name itu tergantung name dari tag input 
+
+contoh full coding :
+<input type="text" name="name" class="form-control rounded-top @error('name') is-invalid @enderror " id="name" placeholder="name">
+
+
+3. cara memberitahu erornya kenapa :
+beri code ini pada index.blade.php disetiap input
+@error('name') 
+	//tag ini adalah punya bootsrap
+         <div id="validationServer03Feedback" class="invalid-feedback">
+                   {{ $message }}
+         </div>
+@enderror 
+//tag tersebut akan dijalankan ketika eror 
+// {{ $message }} adalah suatu fungsi yang akan memberi tau eror apa yg terjadi 
+
+
+
+==============================================================================================
+
+
+Insert data user / memasukan data ke table 
+
+ketika data sukses divalidasi maka langkah selanjutnya insert data ke database
+- buka file registerController dan simpan data yang telah di validasi ke dalam variabel contohnya seperti ini :
+ $validatedData = $request->validate([
+            'name' => 'required|max:255',
+            'username' => 'required|unique:users|min:3|max:255' ,
+            'email' => 'required|email:dns|unique:users' ,
+            'password' => 'required|min:5|max:255'
+        ]) ;
+
+
+- password di enkripsi :
+$validatedData['password'] = bcrypt($validatedData["password"]) ; 
+atau 
+use Illuminate\Support\Facades\Hash; //paling atas
+$validatedData['password'] = Hash::make($validatedData["password"]) ; 
+
+
+- masukan hasil validasi ke table dengan code :
+User::create($validatedData) ; 
+
+
+
+-pesan ketika berhasil
+session()->flash('succes', 'Data berhasil masuk!');
+
+didalam index.blade.php(login)
+@if(session()->has('succes'))
+                <div class="alert alert-succes alert-dismissible fade show" role="alert">
+                    {{ session('succes') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+@endif
+
+
+-redirect/ pindah file ketika data masuk 
+return redirect('/login') ; 
+
+
+
+- atau langsung mengirim flash dan redirectnya seperti ini 
+return redirect('/login')->with('succes', 'Data berhasil masuk!'); 
+
+
+
+
+
+
+
+

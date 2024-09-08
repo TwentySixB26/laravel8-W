@@ -1,0 +1,55 @@
+untuk dapat mengunduh laravel diharuskan instal composer terlebih dahulu,jika sudah terinstal maka unduh packpage nya 
+
+
+cara install laravel mengunakan composer  :
+1. composer create-project laravel/laravel:^8.0 example-app  //untuk install laravel,example-app adalah nama foldernya,jika ingin diganti boleh 
+2. cd example-app  //agar masuk ke dalam folder yang telah di install
+3. php artisan serve   //untuk masuk ke server agar dapat dijalankan dibrowser 
+
+
+
+=============================================================
+
+install laravel versi global :
+1. composer global require laravel/installer
+
+2. jika di terminal tulis "laravel" error maka lakukan langkah ini ==>
+-klik kanan di start menu
+-system
+-cari About
+-cari advanced system settings 
+-klik environment variables 
+-di system variabels cari PATH 
+-klik edit 
+-klik new 
+-masukan %USERPROFILE%\AppData\Roaming\Composer\vendor\bin
+-succes 
+
+3. laravel new example-app
+4. cd example-app
+5. php artisan serve
+
+===============================================================
+
+
+cara menjalankan laravel mengunakan valet, agar dapat diakses di web dengan nama foldernya dan diakhiri dengan titik test (.test)
+tapi harus mengunakan composer dan ini link nya :
+https://packagist.org/
+
+lalu install 
+1. composer global require cretueusebiu/valet-windows
+2. valet install
+3. lalu masuk ke link ini untuk melakukan beberapa setting : 
+https://mayakron.altervista.org/support/acrylic/Windows10Configuration.htm
+4. Tentukan valet mau diparkir dimana agar apk kita dapat dengan mudah dijalankan,ketik 
+valet park 
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,122 @@
+membuat categori & eloquent relationship:
+agar dapat memberi contoh suatu studi kasus yang akan berhubungan seperti one to many, many to many  
+
+
+===================================================================
+
+
+membuat categori :
+1. buat model dan migration 
+php artisan make:model -m Category
+
+2. Buat tabel dan dibagian schema::create('categories').... di isikan atau dibagian Categories.php
+$table->string('name')->unique(); 
+$table->string('slug')->unique(); 
+
+3. hubungan tabel kategori dan post karena post meminta/mengambil data dari kategori
+buka file Posts dan tambahkan table ini 
+$table->foreignId('category_id') ; 
+
+
+4.php artisan migrate:fresh 
+
+
+5. buka file Category.php dan masukan code:
+protected $guarded = ['id'] ;
+
+6. isi category nya :
+php artisan tinker 
+
+7. $category = new App\Models\Category 
+
+8.$category->name = 'Progaming' ; 
+
+9. $category->slug = 'progaming' ; 
+
+9. $category->save() ; 
+
+
+==================================================================================
+
+
+Eloquent Relationship
+
+ada dua table category dan post 
+post mengambil data category, maka hubungan category ke post adalah 1toMany (hasManny) sedangkan hubungan antara category ke post(belongsTo)
+ada 4 tipe:
+belongsTo,belongsToManny,hasManny,hasOne
+
+agar dapat menghubungkan table yang saling berelasi 
+kita akan menghubungkan table post dan tabel category caranya :
+
+1. masuk ke file Post.php lalu buatk method yang namanya category seperti ini 
+public function category(){
+	return $this->belongsTo(Category::class) ; //belongsTo itu disesuaikan dengan relasinya 
+} 
+
+2. isikan tabel post kembali karena datanya kena reset karena di refresh tadi :
+App\Models\Post::create([
+	'title' => 'judul ke 3' ,
+	'slug' => 'judul-ke-3' , 
+	'excerpt' => 'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Hic alias dolorem rerum dolore non veniam, deleniti nihil molestiae odio 
+			ut doloribus ex similique quam libero numquam aperiam reprehenderit eligendi ratione soluta' ,
+	
+	'body' => '<p> Lorem, ipsum dolor sit amet consectetur adipisicing elit. Hic alias dolorem rerum dolore non veniam, deleniti nihil molestiae 
+			odio ut doloribus ex similique quam libero numquam aperiam reprehenderit eligendi ratione soluta id. </p> <p>Vel sint facilis in 
+			ullam nihil corrupti maxime, laboriosam deserunt. Non tempora, repellat temporibus quisquam quam accusantium sint maiores aperiam
+			itaque adipisci sapiente dolor aliquam sit fugiat exercitationem deleniti esse! Cumque in ipsam rem nisi aspernatur? 
+			Similique temporibus repellendus ducimus magnam magni dicta vel dolor beatae eum ex, sapiente provident facilis velit atque 
+			deserunt incidunt amet, mollitia numquam tempore </p> <p> voluptates qui. Perspiciatis eos placeat distinctio rem saepe 
+			voluptatem provident dolorem, ea ad qui in ut alias quo facere iure facilis laudantium vel ullam illo libero officia explicabo 
+			maxime praesentium eum! Nam dolore accusantium iusto est molestias hic corrupti.</p>',
+	'category_id' => 3 
+])
+
+3. cek apakah sudah terhubung atau belum : 
+- reset dulu , lalu masuk lagi mengunakan php artisan tinker 
+- $post = App\Models\Post::first() ; 
+-$post->category
+
+itu hanya akan tampil diterminal saja,lantas bagaimana jika ingin ditampilkan di website??
+
+
+===================================================================================
+
+
+Implementasi Relationship
+
+1. Buka file Detail.php 
+
+2. buat tag p dan isikan didalamnya seperti ini 
+<p> Website create by. {{ $posts->category->name }} </p>
+
+
+Cara agar ketika category nya di klik akan menampilkan semua post yang berhubungan dengan kategori tersebut :
+1. buat tag <a> 
+
+2. ketik kode ini :
+<a href="/categories/{{ $post->category->slug }}"> isi <a/>
+
+3. masuk ke file web.php dan buat route baru 
+Route::get('/categories/{category:slug}' , function(Category $category){
+	return view('category',[
+		'title' => $category=>name , 
+		'posts' => $category=>posts,
+		'category' => $category=>name
+	]) ;
+}) ; 
+
+
+4. buat file category.blade.php dan isinya disesuaikan apa saja yang ingin tampil 
+
+5. buka file Category.php lalu masukan code
+public function posts(){
+	return $this->hasMany(Post::class) ; 
+} 
+
+
+cara menampilkan semua kategori 
+
+
+
+

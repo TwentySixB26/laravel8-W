@@ -1,0 +1,293 @@
+PEMBAHASAN : 
+
+1. Enctype 
+adalah atribut dalam elemen <form> HTML yang digunakan untuk menentukan bagaimana data form harus dikodekan sebelum
+dikirim ke server. Ini sangat penting ketika formulir berisi input yang mengunggah file atau data biner lainnya. 
+Ada beberapa nilai enctype yang umum digunakan:
+
+a. application/x-www-form-urlencoded (Default):
+Ini adalah nilai default dan paling umum digunakan. Data form akan dikodekan sebagai pasangan kunci-nilai, 
+dengan setiap pasangan dipisahkan oleh simbol &, dan setiap kunci atau nilai dipisahkan oleh simbol =. 
+Karakter khusus dalam kunci dan nilai dikodekan menggunakan URL encoding.
+
+
+b. multipart/form-data
+Digunakan ketika formulir mengandung file yang diunggah. Setiap bagian dari data form dikirim sebagai bagian 
+terpisah dalam permintaan HTTP, memungkinkan file biner untuk diunggah bersama data form lainnya
+
+c. text/plain:
+Data form dikirim sebagai teks biasa, tanpa URL encoding. Ini jarang digunakan karena tidak mengenkripsi data dengan cara 
+yang sama seperti metode lainnya, sehingga kurang aman dan tidak disarankan untuk data sensitif.
+
+
+
+
+
+2. file()
+Fungsi ini digunakan untuk mengambil file yang diunggah melalui request. Ketika Anda menggunakan $request->file('image'), 
+Laravel akan mencari file yang diunggah dengan nama input image dari form. Jika file tersebut ada, maka akan mengembalikan 
+instance dari kelas UploadedFile.
+
+
+
+
+3.store()
+Fungsi ini digunakan untuk menyimpan file yang diunggah ke sistem penyimpanan (storage) Laravel. Metode ini menerima 
+satu parameter yang menentukan direktori tujuan penyimpanan file tersebut relatif terhadap direktori storage/app.
+
+
+
+4. asset() 
+di Laravel digunakan untuk menghasilkan URL yang mengarah ke file di dalam direktori public aplikasi. 
+Ini berguna untuk merujuk file seperti gambar, CSS, JavaScript, atau file lain yang disimpan di folder public.
+
+
+
+===================================================================================================================
+
+
+membuat input file 
+
+- buka file create.blade.php untuk menambahkan form input file seperti ini,simpan setelah category :
+<div class="mb-3">
+            <label for="image" class="form-label">Post img</label>
+            <input class="form-control" type="file" id="image" name="image">
+</div>
+
+
+
+- pada form tambahkan :
+enctype="multipart/form-data"
+
+fungsi nya adalah untuk menangani file yang akan di upload, jika method hanya akan menangani berupa text maka 
+untuk menangani file dibutuhkan enctype 
+
+
+
+==========================================================================================================================
+
+
+
+Cara kerja proses upload file img 
+
+- sebagai contoh buka file dashboardPostContoller untuk mengupload file img nya, simpan di method store dan simpan dipaling
+atas : 
+return $request->file('image')->store('post-images') ;
+// file() digunakan untuk mengambil file nya dan store tempat untuk menyimpanya 
+
+
+
+- jika terjadi eror :
+1.buka file xampp dan cari file bernama php.ini 
+2.cari (ctrl + f) "upload_tmp_dir"
+3.buka komentarnya dengan hapus tanda ';'
+4.isi nilainya dengan c:\windows\temp
+5.jadinya : upload_tmp_dir = c:\windows\temp 
+
+
+
+==========================================================================================================================
+
+
+
+Konfigurasi file storage 
+
+kenapa di konnfigurasi tempat penyimpanan nya? agar dapat diakses oleh public/semua orang, jika defaultnya disimpan di 
+storage/app disitu tidak akan bisa diakses oleh public. agar bisa diakses/dilihat orang lain maka harus memindahkanya 
+ke folder storage/app/public maka bisa diakses,bisa dipindahkan secara manual tapi itu akan merepotkan dan ribet oleh sebab itu 
+harus dikonfigurasi. cara konfigurasinya adalah  : 
+
+- buka file filesystems.php di folder config 
+
+
+
+- copy code "FILESYSTEM_DISK" yang ada di default, full code :
+'default' => env('FILESYSTEM_DISK', 'local')
+
+
+
+- buka file .env dan copy kan code ini di akhir file :  
+FILESYSTEM_DISK = public 
+
+
+- sukses
+
+
+- untuk bisa mengakses nya harus dihubungkan lagi antara folder storage/app/public dengan folder public dengan cara install symbolic link
+yaitu :
+php artisan storage:link
+
+
+- maka di folder public ada folder storage 
+
+
+
+
+==========================================================================================================================
+
+
+
+Membuat field image di tabel post
+
+kenapa harus buat ulang tabel post nya? karena di dalam database tidak ada field yang bernama img oleh sebab itu 
+kita harus membuatnya,caranya adalah :
+
+
+- buka file ...created_posts_table.php dan tambahkan satu field yaitu :
+$table->string('image')->nullable() ; 
+
+
+
+- buka file postFactory.php dan ubah dari di user_id menjadi angka random nya yg bisa di lakukan adalah dari 1-4 contoh code :
+'user_id' => mt_rand(1,4)
+
+
+
+- buka databaseSedeer dan ubah user factorynya menjadi 3 saja,serta jalankan/buka komentar satu code create akun nya secara manual sebanyak 
+1 akun saja untuk membuat akun atas nama sendiri serta tambahkan data username. jadi codenya seperti ini :
+
+ User::create([
+            'name' => 'Bayu aji' , 
+            'username' => 'bayuaji' , 
+            'email' => 'bayuaji@gmail.com' , 
+            'password' => bcrypt('password')
+        ]) ; 
+
+
+User::factory(3)->create();
+
+
+
+- buka terminal dan ketik ini : 
+php artisan migrate:fresh --seed
+
+
+
+
+==========================================================================================================================
+
+
+Validasi image dan mengirim img
+
+validasi img digunakan untuk rules atau hal hal apa saja yang boleh dilakukan ketika memasukan file 
+
+- menambahkan rules untuk image seperti code pada code berikut, buka dashboardpostController dan masuk ke method store:
+'image' => 'image|file|max:1024',
+
+image agar yang boleh dikirim bentuknya img,file itu agar ketika kita memberi max,min atau size tidak dianggap string jadi 
+max,min,size itu dianggap seperti file oleh sebab itu jika ingin memberi min,max,size pada file diwajibkan tulis "file" juga
+
+
+
+
+
+- cek validasi ketika img gagal dikirim/ketika lebih dari 1Mb/yang dikirim bukan img, buka file 
+create.blade.php dan berikan @error seperti pada sebelumnya,ini code full :
+
+{{-- input img  --}}
+        <div class="mb-3">
+            <label for="image" class="form-label">Post img</label>
+            <input class="form-control" type="file" id="image" name="image" class="@error('image') is-invalid @enderror">
+            @error('image')
+                <p class="text-danger">{{ $message }}</p>
+            @enderror
+        </div>
+{{-- akhir input img  --}}
+
+
+
+
+
+- menangani agar ketika user tidak mengirim gambar maka akan mengunakan img default, tapi jika user mengirim gambar 
+maka img akan dikirim/diupload ke direktori kita. caranya adalah  :
+
+//jika data dari request yang tipe nya file dan mengirim img maka tampilkan didalamnya
+if ($request->file('image')) {
+            $validatedData['image'] = $request->file('image')->store('post-images') ;
+	   // file() digunakan untuk mengambil file nya dan store tempat untuk menyimpanya 
+        }
+
+
+
+- sukses
+
+
+
+
+==========================================================================================================================
+
+
+Menampilkan img yang ada didatabase 
+
+karena disebelumnya masih mengunakan img default maka data yang sudah dikirim belum bisa tampilkan,dan inilah 
+beberapa code yang harus di ubah agar bisa menampilkan data img dari database, jika img nya kosong baru mengunakan default
+
+
+- menampilkan img di show.blade.php, ganti img yang sebelumnya dengan code ini :
+
+ {{-- menampilkan img,tapi dicek terlebih dahulu ada img tidak di db jika tidak ada mengunakan img default  --}}
+            @if($post->image)
+                <img src="{{ asset('storage/'.$post->image )}}"  alt="img/{{ $post->category->name }}.jpg" class="img-fluid my-3">
+            @else
+                <img src="/img/{{ $post->category->name }}.jpg"  alt="img/{{ $post->category->name }}.jpg" class="img-fluid my-3">
+            @endif
+{{-- akhir img  --}}
+
+
+
+
+
+- menampilkan image di blog.blade.php,  ganti img yang sebelumnya dengan code ini :
+//ini dibagian blog yang utama atau halaman besar 
+{{-- menampilkan img,tapi dicek terlebih dahulu ada img tidak di db jika tidak ada mengunakan img default  --}}
+            @if($blogs[0]->image)
+                <img src="{{ asset('storage/'.$blogs[0]->image )}}"  alt="img/{{ $blogs[0]->category->name }}.jpg" class="img-fluid my-3">
+            @else
+                <img src="/img/{{ $blogs[0]->category->name }}.jpg" height="400" class="card-img-top" alt="img/{{ $blogs[0]->category->name }}.jpg">
+            @endif
+{{-- akhir img  --}}
+
+
+
+//ini dibagian blog yang banyak 
+{{-- menampilkan img,tapi dicek terlebih dahulu ada img tidak di db jika tidak ada mengunakan img default  --}}
+                            @if($blog->image)
+                                <img src="{{ asset('storage/'.$blog->image )}}"  alt="img/{{ $blog->category->name }}.jpg" class="img-fluid my-3">
+                            @else
+                                <img src="/img/{{ $blog->category->name }}.jpg" class="card-img-top" alt="img/{{ $blog->category->name }}.jpg">
+                            @endif
+{{-- akhir img  --}}
+
+
+
+
+
+
+
+- menampilkan image di detail.blade.php,  ganti img yang sebelumnya dengan code ini :
+
+{{-- menampilkan img,tapi dicek terlebih dahulu ada img tidak di db jika tidak ada mengunakan img default  --}}
+                @if($posts->image)
+                    <img src="{{ asset('storage/'.$posts->image )}}"  alt="img/{{ $posts->category->name }}.jpg" class="img-fluid my-3">
+                @else
+                    <img src="/img/{{ $posts->category->name }}.jpg"  alt="img/{{ $posts->category->name }}.jpg" class="img-fluid my-3">
+                @endif
+{{-- akhir img  --}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

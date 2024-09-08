@@ -1,0 +1,177 @@
+pada latihan sebelumnya kita membuat postingan artikel mengunakan manual,dan akan mengantinya mengunakan yang ada di database, caranya :
+1. Membuat model dan migration nya terlebih dahulu bisa langsung pada VSCode yaitu (CTRL+shift+p) atau mengunakan terminal dan menuliskan (php artisan 
+make:model -m Post) jika mengunakan cara yg kedua maka akan otomatis dibuatkan file model dan migration nya
+
+2. Buka file yang ada migration dan edit apa saja yang ingin ditambahkan pada Schema::create contoh :
+	$table->id; 
+	$table->string('title') ;
+	$table->text('excerpt') ;
+	$table->text('body') ;
+	$table->timestamp('published_at')->nullable(); 
+	$table->timestamps(); //untuk membuat field created_at dan updated_at 
+	
+3. tulis di terminal :
+	php artisan migrate:fresh
+
+4. ketik :
+	php artisan tinker
+
+5. ketik :
+	$post = new Post 
+
+6. isi untuk database seperti ini tapi sesuaikan apa yg ingin diisi,ini hanya contoh
+	$post->title = 'post 1' 
+	$post->excerpt = 'yang kena cut '
+	$post->body = 'loremmmmmm detail lengkap' ; 
+
+7. ketik : 
+	$post->save();
+
+
+
+========================================================================================
+
+Blade escape caracteer 
+
+{{  }}
+jika kita mengunakan {{ $isi }} ini akan memunculkan echo seprti pada php dan akan melakukan htmlspecial cars, jadi jika isinya ada <h1>isi</h1> maka tag
+h1 itu tidak akan di eksekusi.
+
+{!!  !!}
+Lantas bagaimana jika ingin ikut di eksekusi juga? kita jangan pake {{}} tapi mengunakan {!! $isi !!} jika $isi berisikan <h1>isi</h1> maka tag h1 juga akan
+ikut di eksekusi
+
+
+
+===========================================================================================
+
+mass assignment
+
+cara lain mengisi sebuah table ada cari lain selain mengunakan cara yg diatas yaitu:
+
+1. buat fillebel didalam models post yaitu seperti ini 
+
+protected $fillable = ['title' , 'excerpt' , 'body'] ;  		
+// jika ingin apa saja yang boleh diisi 
+
+protected $guarded = ["id"] ; 
+// jika ingin apa saja yang tidak boleh diisi 
+
+2. buat code untuk memasukan isi yang ingin dikirim ke table
+App\Models\Post::create([
+	'title' => 'judul ke empat by freya' ,
+	'excerpt' => 'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Hic alias dolorem rerum dolore non veniam, deleniti nihil molestiae odio 
+			ut doloribus ex similique quam libero numquam aperiam reprehenderit eligendi ratione soluta' ,
+	'body' => '<p> Lorem, ipsum dolor sit amet consectetur adipisicing elit. Hic alias dolorem rerum dolore non veniam, deleniti nihil molestiae 
+			odio ut doloribus ex similique quam libero numquam aperiam reprehenderit eligendi ratione soluta id. </p> <p>Vel sint facilis in 
+			ullam nihil corrupti maxime, laboriosam deserunt. Non tempora, repellat temporibus quisquam quam accusantium sint maiores aperiam
+			itaque adipisci sapiente dolor aliquam sit fugiat exercitationem deleniti esse! Cumque in ipsam rem nisi aspernatur? 
+			Similique temporibus repellendus ducimus magnam magni dicta vel dolor beatae eum ex, sapiente provident facilis velit atque 
+			deserunt incidunt amet, mollitia numquam tempore </p> <p> voluptates qui. Perspiciatis eos placeat distinctio rem saepe 
+			voluptatem provident dolorem, ea ad qui in ut alias quo facere iure facilis laudantium vel ullam illo libero officia explicabo 
+			maxime praesentium eum! Nam dolore accusantium iusto est molestias hic corrupti.</p>',
+	
+])
+
+
+
+Cara update  
+contoh code :
+App\Models\Post::find(3)->update([
+	'title' => 'ubah juudul' 
+]) 	
+//jika pakai find otomatis yg dicari adalah id  jika ingin yg lain maka gunakan 
+
+
+
+App\Models\Post::where('title' , 'judul ke empat by freya')->update([
+	'excerpt' => 'excreprt freya berubah'
+])
+
+
+
+
+
+====================================================================================================
+
+Route Model Binding
+
+Route Model Binding adalah fitur Laravel yang memungkinkan pengikatan otomatis instance model ke parameter rute, sehingga mempermudah dan 
+mempercepat pengelolaan data dari rute ke controller.
+
+contoh pengunaan dan alur :
+1. //pada file web.php
+Route::get('/blog/{post}', [PostController::class,'detail']);
+
+
+2. //pada postController
+public function detail(Post $post){
+        return view('detail',[
+            "title" => "Detail Blog",
+            "posts" => $post 
+        ]);
+    }
+
+
+3. // pada file 2024_08_21_164436_create_posts_table.php
+public function up(): void
+    {
+        Schema::create('posts', function (Blueprint $table) {
+            $table->id();
+            $table->string('title') ;
+            $table->string('slug')->unique() ;
+            $table->text('excerpt') ;
+            $table->text('body') ;
+            $table->timestamp('published_at')->nullable(); 
+            $table->timestamps();
+        });
+    }
+
+
+4. // control D atau C lalu ulang lagi dari awal yaitu migrate
+php artisan migrate:fresh 
+
+
+5. php artisan tinker 
+
+6. App\Models\Post::create([
+	'title' => 'judul ke tiga by feni' ,
+	'slug' => 'judul-ke-tiga-by-feni' , 
+	'excerpt' => 'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Hic alias dolorem rerum dolore non veniam, deleniti nihil molestiae odio 
+			ut doloribus ex similique quam libero numquam aperiam reprehenderit eligendi ratione soluta' ,
+	'body' => '<p> Lorem, ipsum dolor sit amet consectetur adipisicing elit. Hic alias dolorem rerum dolore non veniam, deleniti nihil molestiae 
+			odio ut doloribus ex similique quam libero numquam aperiam reprehenderit eligendi ratione soluta id. </p> <p>Vel sint facilis in 
+			ullam nihil corrupti maxime, laboriosam deserunt. Non tempora, repellat temporibus quisquam quam accusantium sint maiores aperiam
+			itaque adipisci sapiente dolor aliquam sit fugiat exercitationem deleniti esse! Cumque in ipsam rem nisi aspernatur? 
+			Similique temporibus repellendus ducimus magnam magni dicta vel dolor beatae eum ex, sapiente provident facilis velit atque 
+			deserunt incidunt amet, mollitia numquam tempore </p> <p> voluptates qui. Perspiciatis eos placeat distinctio rem saepe 
+			voluptatem provident dolorem, ea ad qui in ut alias quo facere iure facilis laudantium vel ullam illo libero officia explicabo 
+			maxime praesentium eum! Nam dolore accusantium iusto est molestias hic corrupti.</p>'
+])
+
+
+
+7. membuat yang dikirimkan adalah slug bukan id 
+//pada file blog.blade.php
+
+@section('container') 	
+    @foreach ($blogs as $blog)
+        <article class="mb-5">
+            <h2> 
+                <a href="/blog/{{ $blog->slug }}">{{ $blog->title }} </a>
+            </h2>
+            <p>{{ $blog->excerpt }}</p>
+        </article>
+    @endforeach
+@endsection 
+
+
+
+8. membuat agar yang dicari adalah slug bukan id 
+buka file web.php 
+pada awalnya seperti ini :
+Route::get('/blog/{post}', [PostController::class,'detail']);
+maka yang akan dicari adalah id,karena id adalah primary key maka defaultnya adalah id 
+
+Route::get('/blog/{post:slug}', [PostController::class,'detail']);		
+    

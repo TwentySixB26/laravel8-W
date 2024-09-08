@@ -1,0 +1,124 @@
+1. Database (.env)
+APP_ENV=local 		//jika masih ingin diedit2 databasenya/table
+APP_ENV=production 	//jika sudah fix
+
+
+
+====================================================================================
+
+
+2. Migration 
+adalah fitur yang digunakan untuk mengelola skema database. Migration memungkinkan Anda untuk membuat, memodifikasi, dan menghapus tabel 
+dan kolom dalam database dengan cara yang terorganisir dan dapat dikontrol versi. 
+dengan mengunakan migration kita tak perlu membuat table di phpMyAdmin 
+
+
+cara membuat migration bisa mengunakan artisan/cmd  :
+//untuk membuat tabel baru 
+php artisan make:migration create_flights_table
+
+
+// Untuk menjalankan semua migrasi yang tertunda
+php artisan migrate			
+
+
+
+A. up()  : 
+Digunakan untuk mendefinisikan semua perubahan yang harus dilakukan pada basis data, seperti membuat tabel, menambahkan kolom, 
+membuat indeks, atau memodifikasi tabel yang ada. 
+
+jika kita menuliskan code : php artisan migrate 
+secara tidak langsung kita menjalankan semua yang ada di up()
+
+
+
+B. down() :
+Digunakan untuk mendefinisikan bagaimana cara mengembalikan (rollback) perubahan yang dilakukan oleh metode up(). Misalnya, jika up() membuat sebuah 
+tabel, maka down() akan menghapus tabel tersebut.
+
+jika ingin menjalankan fungsi down() maka kita dapat menuliskan code :
+php artisan migrate:rollback
+
+
+
+C. Rollback dan migrate satu perintah 
+digunakan untuk melakukan dua perintah langsung yaitu up() dan down() yang akan dieksekusi terlebih dahulu adalah down setelah itu up,
+jadi jika kita mengunakan ini maka data akan dihapus dulu baru dibuat ulang.
+
+code : 
+php artisan migrate:fresh
+
+
+Recap Alur :
+php artisan make:migration create_flights_table
+php artisan migrate	//atau bisa mengunakan 
+php artisan migrate:fresh
+
+
+
+==============================================================================
+
+
+
+3. Eloquent ORM 
+
+untuk menambahkan data kita dapat melakukanya di dalam codingan kita,tanpa masuk ke phpmyAdmin.
+bawaan Laravel yang memungkinkan Anda untuk berinteraksi dengan basis data menggunakan model PHP yang berbasis objek, alih-alih menulis query SQL 
+secara langsung. Dengan Eloquent, setiap tabel dalam basis data memiliki model yang sesuai yang digunakan untuk berinteraksi dengan tabel tersebut.
+
+A. Tinker 
+digunakan untuk berinteraksi dengan aplikasi laravel kita. 
+Laravel Tinker adalah alat interaktif berbasis command-line yang memungkinkan Anda untuk berinteraksi langsung dengan aplikasi Laravel. Dengan Tinker,
+Anda bisa menjalankan perintah PHP, bekerja dengan model Eloquent, dan mengakses berbagai fungsi dan fitur Laravel tanpa perlu menulis skrip secara terpisah.
+
+code : 
+php artisan tinker
+
+
+ketika melakukan migration maka akan saling terhubung dengan file yang ada di dalam model. 
+jika kita punya file migration yang menangani table mahasiswa, maka kita harus punya juga file yang ada didalam folder model yang saling berlerasi dengan file 
+yang ada di migration. 
+
+agar bisa mengakses file yang ada di models yang saling berelasi dg file yg ada dimigration kita harus menginisiasi terlebih dahulu caranya :
+
+- harus membuat variabel terlebih dahulu di terminal, dan akan mengunakan contoh User.php yang ada difolder models yang menangani table yg ada dimigration
+yang berhubungan dengan user. begini lah tulisan yang ada di terminal :
+
+$user = new App\models\User 
+// App\models\User tulis berdasarkan lokasi penyimpanan nya sedangkan $user disamakan saja dengan nama File yang ada difolder models agar tidak bingung
+
+
+- isi table 
+untuk mengetahui apa saja yang dapat diisi didalam tabel harus mengecek terlebih dahulu yang ada di file User.php dan fokus ke dalam code ini 
+ // protected $fillable = [
+        'name',
+        'email',
+        'password',
+ //  ];
+
+jadi kita isikan :
+$user->name = 'Bayu aji' ; 
+$user->email = 'Bayuaji@gmail.com' ; 
+$user->password = bcrypt('12345') ;  	//bcrypt digunakan untuk mengenkripsi password
+
+
+- save jika telah diisi table nya dengan cara melakukan ini :
+$user->save(); 
+maka data sukses masuk kedalam database 
+
+
+- jika ingin melihat isi yang ada di table user maka :
+$user->all(); 
+
+
+Warning!!
+jika ingin mengisikan data kembali maka ulang lagi dari awala yaitu dari inisiasi ($user = new App\models\User)
+
+
+Recap :
+php artisan tinker
+$user = new App\models\User 
+$user->name = 'Bayu aji' ; 
+$user->email = 'Bayuaji@gmail.com' ; 
+$user->password = bcrypt('12345') ;
+$user->save(); 

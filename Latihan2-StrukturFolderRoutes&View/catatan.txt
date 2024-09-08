@@ -1,0 +1,38 @@
+=============================== Folder folder yang ada di Laravel ================================
+
+Model: 
+Kelas Product yang berisi metode untuk mengambil data produk dari database.===>
+bagian ini menangani semua yang berkaitan dengan data dan logika bisnis aplikasi. Model bertugas untuk mengakses database, 
+memanipulasi data, dan menerapkan aturan bisnis.
+
+
+View: 
+Template HTML product-detail.blade.php yang menampilkan informasi produk.  =============>
+Bagian ini bertanggung jawab untuk menampilkan data ke pengguna. View mengatur bagaimana data dari model ditampilkan 
+dalam format yang ramah pengguna, seperti halaman web, laporan, atau antarmuka pengguna lainnya.
+
+
+Controller: 
+Kelas ProductController yang menangani permintaan untuk melihat detail produk, mengambil data dari model, 
+dan memanggil view untuk menampilkannya.  ==========>
+Controller adalah penghubung antara model dan view. Controller menerima input dari pengguna (misalnya, melalui form atau URL), 
+memprosesnya dengan bantuan model, dan kemudian menentukan view mana yang akan ditampilkan.
+
+
+Routes : 
+penjaluran pada web aplikasi. ========>
+Misal ketika user mengetikan sesuatu ke URL maka akan ditangani oleh Route mana  
+
+
+public : 
+digunakan menyimpan aset aset kita,contohnya IMG,CSS,JS dan lain lain 
+
+
+Resources :
+mirip dengan public karena ada folder yang berisikan img,js,css bukan tempat menyimpan file statis kita. akan mengunakan file di folder ini
+ketika ingin melakukan sistem bundling 
+
+
+
+
+

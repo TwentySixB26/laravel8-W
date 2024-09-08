@@ -1,0 +1,269 @@
+replace : 
+fungsi replace pada js digunakan untuk mengganti sebagian string dengan string lain.
+
+Berikut penjelasan lebih detail mengenai bagian preslug.replace(/ /g,"-");:
+/ /g: Ini adalah regular expression (regex) yang mencari semua spasi dalam string.
+/ /: Regex ini mencari karakter spasi.
+g: Singkatan dari "global," yang berarti regex akan mencari semua spasi dalam string, bukan hanya spasi yang pertama ditemukan.
+"-": Ini adalah string pengganti yang akan menggantikan setiap spasi yang ditemukan oleh regex dengan tanda hubung -.
+
+
+
+
+response=> :
+Dalam JavaScript, khususnya ketika bekerja dengan API dan fetch atau metode AJAX lainnya, objek Response digunakan untuk mewakili 
+respons yang diterima dari permintaan HTTP. Objek Response memberikan berbagai properti dan metode untuk mengakses informasi yang 
+diterima dari server, seperti status, header, dan konten data.
+
+
+
+data=>  :
+"data" mengacu pada informasi atau konten yang dikirim dari server sebagai respons terhadap permintaan. Data ini bisa berupa berbagai format,
+tergantung pada jenis permintaan dan respon yang diharapkan.
+Beberapa Jenis Data yang Bisa Diterima dalam Respons:
+1. JSON
+2. Text contoh code : 
+	fetch('https://example.com/page')
+    		.then(response => response.text())
+    		.then(text => console.log(text));
+3. HTML 
+4. XML
+5. Blop contoh code : 
+		fetch('https://example.com/image.jpg')
+    			.then(response => response.blob())
+    .			then(imageBlob => {
+    			    	// Proses gambar
+    			});
+6. arraybuffer contoh code :
+		fetch('https://example.com/data')
+    			.then(response => response.arrayBuffer())
+    			.then(buffer => {
+        			// Proses data biner
+    			});
+
+
+
+
+
+
+
+
+=====================================================================================================================
+
+membuat tombol create 
+
+- jika ingin membuat create di suatu halaman maka anda tinggal buat saja link pada tag a yang mengarahkan ke /create 
+contohnya seperti ini,saya punya route yang mengarahkan ke resource controller seperti ini :
+Route::resource('/dashboard/posts', DashboardPostController::class)->middleware('auth');
+
+route tersebut maka akan mengarahkan ke controller dashboardpostcontroller maka untuk mengakses create nya adalah  :
+<a href="/dashboard/posts/create" class="btn btn-primary mb-2">Create New Post</a>
+harus diberi embel embel /dashboard/posts karena pada route resource yang terhubung adalah bagian situ. 
+
+maka jika diklik tidak akan terjadi eror karena sudah ditangani oleh resource controller 
+
+
+
+=====================================================================================================================
+
+
+membuat view create 
+
+- untuk bisa me return tampilan create bisa di method create yang sudah disediakan contohnya seperti ini : 
+   public function create()
+    {
+        return view('dashboard.posts.create') ; 
+    }
+
+code tersebut akan mengarah kan ke view create.blade.php yang ada di folder dashboard dan folder posts
+
+
+- jika sudah maka begini lah contoh isi dari create.blade.php :
+untuk action nya mengarah ke route yang akan mengelola CRUD ini yaitu route //Route::resource('/dashboard/posts', DashboardPostController::class)->middleware('auth');//
+maka akan diarahkan methodnya adalah dashboard/posts. 
+action="dashboard/posts" dan method="post" akan secara otomatis diarahkan ke method store yang ada di DashboardPostController yang fungsinya untuk Menyimpan resource baru ke dalam database.
+
+
+
+=====================================================================================================================
+
+
+membuat slug otomatis
+
+cara 1 :
+- untuk membuat slug otomatis diharuskan memakai package dengan cara menginstalnya yaitu :
+composer require cviebrock/eloquent-sluggable
+
+- lalu gunakan  code :
+<script>
+    const title = document.querySelector("#title");
+    const slug = document.querySelector("#slug");
+
+    title.addEventListener("keyup", function() {
+        let preslug = title.value;
+        preslug = preslug.replace(/ /g,"-");
+        slug.value = preslug.toLowerCase();
+    });
+</script>
+
+pada file create.blade.php, #title dan #slug itu diambil dari tag input  
+
+
+
+
+cara 2 : 
+- untuk membuat slug otomatis diharuskan memakai package dengan cara menginstalnya yaitu :
+composer require cviebrock/eloquent-sluggable
+
+
+- buka model post,karena table posts yang berhubungan ada di models post, simpan code ini diluar class :
+use Cviebrock\EloquentSluggable\Sluggable;
+
+- berikan code ini di dalam class Post :
+use Sluggable;
+
+
+- buat method ini dan simpan juga di dalam class post :
+public function sluggable(): array
+    {
+        return [
+            'slug' => [
+                'source' => 'title'
+            ]
+        ];
+    }
+
+
+
+
+- untuk melakukan slug nya diperlukan code js, buka file create.blade.php :
+<script>
+    const title = document.querySelector("#title");
+    const slug = document.querySelector("#slug");
+
+    title.addEventListener("change", function() {
+        
+        fetch('/dashboard/posts/createSlug?title=' + title.value) //jika ada request yg mengarah ke '/dashboard/posts/createSlug' maka jalanka
+            .then(response => response.json()) 
+            .then(data => slug.value = data.slug) 
+    });
+</script>
+
+
+
+- buat route untuk ('/dashboard/posts/createSlug') 
+Route::get('/dashboard/posts/cekSlug' , [DashboardPostController::class, 'checkSlug'])->middleware('auth') ;
+
+
+
+
+- buat method baru di dashboardPostController untuk menangani request slug/mengambil data :
+use \Cviebrock\EloquentSluggable\Services\SlugService;
+
+ public function checkSlug(Request $request)
+    {
+        $slug = SlugService::createSlug(Post::class, 'slug', $request->title);
+        // Post::class tergantung nama table yg mempunyai data tentang postingan 
+        //slug itu mengambil dari field slug 
+
+        return response()->json([
+            'slug'=>$slug
+            ]) ;
+    }
+
+
+
+
+disarankan pakai cara 1 
+
+
+===============================================================================================================
+
+
+
+membuat combo box category (tag select)
+
+- buka file create.blade.php dan tambahkan tag select seperti berikut :
+<div class="mb-3">
+            <label for="category" class="form-label">Category</label>
+            <select class="form-select" name="category_id">
+                @foreach( $categories as $category )
+                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                @endforeach
+            </select>        
+</div>
+
+
+
+- agar beberapa category nya mengambil dari database Category bukan ditulis ulang secara manual yg nantinya dilooping
+di create.blade.php maka method create di DashboardPostController ganti codenya seperti berikut :
+
+use App\Models\Category;
+
+public function create()
+    {
+        return view('dashboard.posts.create',[
+            'categories' => Category::all()
+        ]) ; 
+    }
+
+
+
+
+====================================================================================================================
+
+
+Membuat editor untuk body menggunakan Trix Editor
+
+- buka file main.blade.php untuk menyimpan style dan js yang dipunyai trix editor :
+ {{-- trix editor  --}}
+<link rel="stylesheet" type="text/css" href="https://unpkg.com/trix@2.0.8/dist/trix.css">
+<script type="text/javascript" src="https://unpkg.com/trix@2.0.8/dist/trix.umd.min.js"></script>
+
+
+
+- buka file create.blade.php dan tambahkan ini 
+<div class="mb-3">
+            <label for="body" class="form-label">Body</label>
+            <input id="body" type="hidden" name="body">
+            <trix-editor input="body"></trix-editor>
+        </div>
+
+
+maka trix editor telah sukses dibuat
+
+
+
+==============================================================================================================
+
+
+Menon-aktif kan fitur upload image pada Trix Editor
+
+didalam trix editor ada fungsi yang mengunakan untuk mempost file,tapi kita blum butuh makanya akan dihapus 
+
+- buka file main.blade.php dan simpan code ini di style : 
+ trix-toolbar [data-trix-button-group="file-tools"] {
+                display: none ; 
+            }
+
+
+
+- buka file create.blade.php dan tambahkan code js ini untuk menonaktifkan fungsi trix editor(nambah file) : 
+document.addEventListener('trix-file-accept',function (e) {
+        e.preventDefault() ; 
+    })
+
+
+
+==============================================================================================================
+
+
+Mencoba mengirimkan data dari form
+
+- buka file DashboardPostController dan masukan code ini di method store :
+return $request ; 
+
+data belum dikirim ke data base,ini hanya untuk mencoba data sudah ditangkap atau belum. 
+
+
+

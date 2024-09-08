@@ -1,0 +1,253 @@
+Pembahasan :
+
+1. request('')
+pada Laravel digunakan untuk mengambil nilai dari input yang dikirimkan melalui permintaan HTTP (HTTP request). 
+Ini bisa berupa data yang dikirim melalui metode GET, POST, atau metode lainnya.
+
+
+2. Query Scoop 
+fitur yang memungkinkan Anda untuk mendefinisikan query yang bisa digunakan kembali pada model Eloquent. Dengan Query Scope, Anda bisa menambahkan 
+metode khusus pada model yang kemudian dapat digunakan untuk menyusun query dengan cara yang lebih bersih dan modular.
+
+
+3. WHEN()
+when digunakan untuk melakukan kondisional chaining pada query builder, collection, atau resource. Fungsi ini berguna untuk menambahkan kondisi ke 
+query atau melakukan operasi tertentu hanya jika kondisi yang diberikan bernilai true.
+
+
+4. whereHas()
+di Laravel digunakan untuk menambahkan kondisi pada query berdasarkan hubungan (relationship) yang ada antara model. Ini sangat berguna ketika Anda
+ingin memfilter hasil query berdasarkan kondisi yang berlaku pada model terkait.
+
+
+
+5. firstWhere
+dalam Laravel digunakan untuk mendapatkan item pertama dari koleksi (Collection) atau query yang memenuhi kondisi tertentu. Metode ini adalah cara 
+sederhana dan efisien untuk mencari elemen pertama yang cocok dengan kondisi tertentu tanpa harus menggunakan metode filter atau where yang lebih umum.
+Pengunaan  :
+- dengan Koleksi (Collection)
+$users = collect([
+    ['name' => 'Alice', 'age' => 30],
+    ['name' => 'Bob', 'age' => 25],
+    ['name' => 'Charlie', 'age' => 35],
+]);
+
+$user = $users->firstWhere('age', 25);
+//Hasilnya, $user akan berisi array ['name' => 'Bob', 'age' => 25].
+
+- dengan Query Builder atau Eloquent
+$user = User::firstWhere('email', 'johndoe@example.com');
+//Ini akan mengembalikan instance dari model User pertama yang memiliki email dengan nilai "johndoe@example.com".
+
+
+
+6. withQueryString() 
+apapun yang ada di link sebelumnya,maka akan terbawa
+
+
+=======================================================================================
+
+membuat form searcing 
+
+1. tampilan searching dengan code :
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <form action="/blog" method="get">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Search" name="search">
+                <button class="btn btn-outline-danger" type="submit" id="">Search</button>
+              </div>
+        </form>
+    </div> 
+</div>
+
+
+
+========================================================================================
+
+
+
+menambahkan query searching berdasarkan title: 
+1. buka file PostController
+
+
+2. masukan code ini didalam index() :
+$blogs = Post::with(['user', 'category'])->latest() ; 
+
+if(request('search')){
+	$blogs->where( 'title' , 'like' , '%' . request('search') . '%' ); 
+	//data diambil dari $blogs yang telah diisikan semua data dari table Post seperti pada code sebelumnya/atas 
+} ; 
+
+
+public function index(){
+        return view('blog',[
+            "title" => "All Post", 
+            "blogs" => $blogs->get()  
+        ]);
+    }
+
+
+3. tapi problemnya adalah ketika telah mengetikan sesuatu di dalam searching maka tidak ada apa apa yang sedang dicari, kita akan membuat tombol searching 
+tersebut menampilkan keyword apa yang sedang kita cari, caranya adalah ganti code sebelumnya dengan code :
+
+<input type="text" class="form-control" placeholder="Search" name="search" value="{{  request('search') }}">
+
+4. succes
+
+
+
+cara agar bisa searching hal lain selain title,seperti contohnya body yang ada di sebuah post:
+1. buka file PostController dan tambahkan code ini :
+if(request('search')){
+	$blogs->where( 'title' , 'like' , '%' . request('search') . '%' ) 
+		->orWhere('body' , 'like' , '%' . request('search') . '%' ); 
+} ; 
+
+2. succes
+
+
+
+=================================================================================
+
+
+Query Scoop 
+
+
+pada codingan sebelumnya penulisanya masih salah karena itu tugas dari Model karena itu mencari data yang biasanya dilakukan oleh models, dan ini kita gunakan 
+dengan cara QUERY SCOPP LOCAL,didalam PostController hanya memangil query nya saja dan scoop local nya/logikanya dipakai didalam Models Post : 
+1. buka file Post.php yang ada di folder Models 
+
+
+2. tuliskan code ini : 
+//nama wajib pakai scope tapi setelah scope itu bebas,contohnya scopeBebas itu boleh 
+//Copy kan code if pada PostController sebelumnya,dan pindahkan ke dalam local scopp yang ada di models
+public function scopeFilter($query) {
+	if(request('search')){
+		return	$query->where( 'title' , 'like' , '%' . request('search') . '%' ) 
+				->orWhere('body' , 'like' , '%' . request('search') . '%' ); 
+	} ; 
+}	
+
+//$query akan memanggil sesuatu yang ada didepanya,dalam code dibawah ini sebelum filter ada Post maka data akan diambil dari table Post dan akan masuk ke dalam $query
+
+pada file PostContoller diubah kembali menjadi :
+public function index(){
+        return view('blog',[
+            "title" => "All Post", 
+            "blogs" => Post::with(['user', 'category'])->latest()->filter()->get()  ; //penulisan ini tidak boleh acak 
+        ]);
+    }
+
+
+3. Succes 
+
+
+
+itu sudah benar,tapi akan dirapihkan lagi karena request('search') adalah tugas dari controller,model hanya melakukan logika nya saja sedangkan yang menerima
+adalah controller. Caranya :
+1. buka folder Models cari  file Post.php 
+
+2. masukan/ganti code nya dengan ini :
+
+public function scopeFilter($query, array $filters) {
+
+	if( isset($filters['search']) ? $filters['search'] : false ){
+		return	$query->where( 'title' , 'like' , '%' . $filters['search'] . '%' ) 
+				->orWhere('body' , 'like' , '%' . $filters['search'] . '%' ); 
+	} ; 
+}	
+
+
+3. buka PostController 
+
+
+4. masukan/ganti code ini : 
+
+public function index(){
+        return view('blog',[
+            "title" => "All Post", 
+            "blogs" => Post::with(['user', 'category'])->latest()->filter( request(['search']) )->get()  ; 
+        ]);
+    }
+
+
+5. succes
+
+
+
+WHEN()
+
+codingan sebelumnya sudah benar tapi ada yang lebih efisien lagi, caranya mengunakan when() yaitu :
+1.buka folder models dan file Post.php dan ganti code sebelumnya dengan ini :
+//
+public function scopeFilter($query, array $filters) {
+	$query->when($filters['search'] ?? false , function($query,$search){
+		return	$query->where( 'title' , 'like' , '%' . $search . '%' ) 
+				->orWhere('body' , 'like' , '%' . $search . '%' ); 
+	}) ; 
+}	
+
+
+
+
+===================================================================================================
+
+
+query filter 
+
+ini digunakan agar ketika kita masuk ke kategori dan mengetikan sesuatu tidak mengarah ke Post all tapi mengarah ke semua kategori yang telah di klik
+digunakan juga untuk author nantinya, itulah kenapa tadi sempat pakai array. caranya adalah : 
+
+1. buka postController dan masukan code ini/ganti code sebelumnya dengan code ini :
+public function index(){
+        return view('blog',[
+            "title" => "All Post", 
+            "blogs" => Post::with(['user', 'category'])->latest()->filter( request([ 'search', 'category' ]) )->get()  ; 
+        ]);
+    } 
+
+
+2. buka Post.php pada Models dan masukan/ganti code sebelumnya dengan ini :
+
+public function scopeFilter($query, array $filters) {
+	$query->when($filters['search'] ?? false , function($query,$search){
+		return	$query->where( 'title' , 'like' , '%' . $search . '%' ) 
+				->orWhere('body' , 'like' , '%' . $search . '%' ); 
+	}) ; 
+
+	//tambahkan code ini pada code sebelumnya 
+	$query->when($filters['category'] ?? false , function($query,$category){
+		return $query->whereHas('category', function('$query' ) use($category) {
+			$query->where('slug', 'category')
+		}) ; 
+	}) ; 
+}	
+
+
+==============================================================================================================
+
+Pagination/page 
+metode pemangilan :
+data->paginate(7) 
+
+cara membuat next dan back pada pagination : 
+{{ $blogs->links() }} 
+//$blogs adalah yang dikembalikan didalam route
+
+tapi default nya adalah tamppilan untuk tailwind,bagaiman untuk bootrap? ini caranya :
+
+1. Cari file :
+App\Providers\AppServiceProvider
+
+
+
+2. didalam function bot nya : 
+public function boot() {
+	paginator::useBootstrap(); 
+}
+
+
+
+3. jika eror tambahkan code ini dipaling atas :
+use Illuminate\Pagination\Paginator;

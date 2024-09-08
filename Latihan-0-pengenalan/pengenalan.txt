@@ -1,0 +1,16 @@
+Unduh : 
+composer 2
+sequel pro/ mysql workbench 
+terminal 
+mysql 
+php versi 7.4/8 
+
+
+
+extensi : 
+PHP intelephense 
+laravel artisan 
+laravel snippets 
+laravel blade snippets 
+laravel blade spacer 
+laravel GotoView

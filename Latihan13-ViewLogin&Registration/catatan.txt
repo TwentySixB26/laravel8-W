@@ -1,0 +1,18 @@
+dalam file LoginController mengunakan code seperti ini :
+ public function index(){
+        return view('login.index', [
+            "title" => 'Login'
+        ]);
+    }
+
+bukan
+ public function index(){
+	//bukan mengunakan /(garis miring) karena di dalam view jika ingin masuk ke folder harus mengunakan .(titik) bukan / (garis miring)
+        return view('login/index', [
+            "title" => 'Login'
+        ]);
+    }
+
+
+
+ 

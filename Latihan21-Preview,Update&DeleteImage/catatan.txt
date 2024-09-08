@@ -1,0 +1,250 @@
+PEMBAHASAN :
+
+1. new FileReader() 
+adalah constructor di JavaScript yang digunakan untuk membuat objek FileReader. Objek ini memungkinkan aplikasi 
+web membaca konten file secara asinkron (misalnya file teks, gambar, atau dokumen lainnya) dari sistem 
+pengguna. Dengan menggunakan FileReader, aplikasi dapat memproses file yang dipilih pengguna tanpa harus mengunggahnya ke server.
+Berikut adalah beberapa metode utama dari FileReader:
+
+readAsText() 		: 	Membaca file sebagai teks.
+readAsDataURL()		: 	Membaca file dan mengembalikannya dalam format data URL (biasanya digunakan untuk menampilkan gambar).
+readAsArrayBuffer()	: 	Membaca file sebagai array buffer.
+readAsBinaryString()	: 	Membaca file sebagai string biner (meskipun metode ini jarang digunakan dan tidak disarankan untuk proyek baru).
+
+
+
+
+2. .files 
+digunakan pada elemen HTML <input> yang memiliki atribut type="file". Properti ini mengembalikan objek 
+FileList yang berisi semua file yang dipilih oleh pengguna melalui input file.
+
+
+
+
+3. onload 
+adalah event handler di JavaScript yang dipanggil ketika sebuah objek atau resource, seperti gambar, skrip, 
+atau file, telah berhasil dimuat sepenuhnya. 
+
+
+
+4. .target 
+adalah properti dari event yang digunakan dalam JavaScript untuk merujuk ke elemen atau objek yang memicu 
+event tersebut. Dalam konteks event onload pada FileReader, .target merujuk ke objek FileReader itu sendiri, 
+yang bertanggung jawab atas event yang sedang berlangsung.
+
+
+
+5. .result 
+adalah properti dari objek FileReader yang berisi hasil dari pembacaan file setelah proses pembacaan 
+selesai. Properti ini akan mengandung data dari file yang telah dibaca, tergantung pada metode yang digunakan untuk membacanya
+
+
+
+6. Storage::
+digunakan untuk berinteraksi dengan sistem penyimpanan file. Laravel menyediakan API penyimpanan yang abstrak 
+melalui Storage facade untuk mengelola file di berbagai sistem penyimpanan seperti disk lokal, Amazon S3, FTP, dan lain-lain.
+
+
+
+
+===============================================================================================================
+
+
+membuat fitur preview img di dalam create post 
+
+- buka file create.blade.php 
+tambahkan event change pada input['image] :
+onchange="previewImage()"
+
+tambahkan juga tag img yang src nya kosong diatas input['image']:
+<img  alt="" class="img-preview img-fluid">
+
+ketika function previewImage dijalankan maka src nya akan ditambahkan kedalam img
+
+
+
+
+
+- tambahkan script ini : 
+ function previewImage() {
+        const image = document.querySelector('#image') ; //menangkap input img
+        const imgPreview = document.querySelector('.img-preview') ; //menangkap tag img dengan src kosong 
+
+        imgPreview.style.display = 'block' ; 
+
+        const oFReader = new FileReader() ; // menangkap file dan menjalankan nya secara asyncron
+        oFReader.readAsDataURL(image.files[0]) ; // mengambil file yang pertama kali diambil di input['image'] dan menampilkanya menjadi img
+
+        //setelah file berhasil dibaca/diambil maka akan diload 
+        oFReader.onload = function(oFREvent) {
+            imgPreview.src = oFREvent.target.result ; //tetapkan hasilnya (URL data dari gambar) ke atribut 'src' elemen img, sehingga gambar akan ditampilkan
+        }
+    }
+
+
+
+===============================================================================================================
+
+
+Update Image
+memperbaiki edit agar bisa mempreview img, dan mengirim img baru 
+
+- buka file edit.blade.php berikan code ini pada tag form sama seperti pada sebelumnya :
+enctype="multipart/form-data"
+
+
+
+
+- tambahkan input file image seperti ini :
+{{-- input img  --}}
+        <div class="mb-3">
+            <label for="image" class="form-label">Post img</label>
+            <img  alt="" class="img-preview img-fluid my-4 col-sm-5">
+            <input class="form-control @error('image') is-invalid @enderror" type="file" id="image" name="image" onchange="previewImage()">
+            @error('image')
+                <p class="text-danger">{{ $message }}</p>
+            @enderror
+        </div>
+{{-- akhir input img  --}}
+
+
+tambahkan juga script untuk menjalankan :
+// untuk membuat img preview sebelum img dikirim ke db dan direktori local 
+    function previewImage() {
+        const image = document.querySelector('#image') ; //menangkap input img
+        const imgPreview = document.querySelector('.img-preview') ;  //menangkap tag img dengan src kosong 
+
+        imgPreview.style.display = 'block' ; 
+
+        const oFReader = new FileReader() ;      // menangkap file dan menjalankan nya secara asyncron
+        oFReader.readAsDataURL(image.files[0]) ; // mengambil file yang pertama kali diambil di input['image'] dan menampilkanya menjadi img
+
+        //setelah file berhasil dibaca/diambil maka akan diload 
+        oFReader.onload = function(oFREvent) {
+            imgPreview.src = oFREvent.target.result ; //tetapkan hasilnya (URL data dari gambar) ke atribut 'src' elemen img, sehingga gambar akan ditampilkan
+        }
+    }
+//akhir untuk membuat img preview sebelum img dikirim ke db dan direktori local 
+
+
+
+
+- sukses 
+
+
+===============================================================================================================
+
+
+pada file edit.blade.php jika kita ingin mengupdate gambar tapi post mempunya ada gambarnya di database maka tampilkan gambarnya dulu, 
+tapi jika tidak ada maka tidak usah ditampilkan. 
+
+
+- buka file edit.blade.php dan berikan seleksi kondisi,jika mempunyai gambar di database maka langsung ditampilkan src nya 
+dari awal, tapi jika tidak ada maka src nya hilangkan, seperti ini code nya, code img yang tidak ada src nya pindahkan saja 
+di else:  
+
+ @if($post->image)
+          <img src="{{ asset('storage/' .$post->image) }}" alt="" class="img-preview img-fluid my-4 col-sm-5 d-block">
+ @else 
+          <img  alt="" class="img-preview img-fluid my-4 col-sm-5">
+ @endif
+
+
+===============================================================================================================
+
+
+Menjalankan update yang baru yang dapat mengirimkan data image, karena fungsi update/edit belum bisa mengirimkan image 
+hanya post create yang sudah bisa mengirimkan image 
+
+
+- buka file dashboardController dan betulkan codenya yang ada di method update
+
+
+- berikan sesuatu yang harus divalidasi di image, seperti ini codenya :
+'image' => 'image|file|max:1024',
+
+
+
+- menangani agar ketika user tidak mengirim gambar maka akan mengunakan img yang lama, tapi jika user mengirim gambar 
+maka img yg baru akan dikirim/diupload ke direktori kita dan namanya akan disimpan ke db. caranya adalah  : 
+
+//logika ini harus disimpan ke sesudah di validasi, karena code ini hanya akan menyimpan file nya ke direktori kita bukan untuk dikirim ke database
+        if ($request->file('image')) {
+            $validatedData['image'] = $request->file('image')->store('post-images') ;
+        }
+
+
+===============================================================================================================
+
+
+memperbaiki update gambar
+
+update gambar akan diperbaiki karena jika mengupdate gambar, gambar yang lama akan tersimpan di direktori kita,dan 
+itu akan menyebabkan folder kita menjadi penuh. yang ingin diperbaiki adalah agarr ketika mengupload gambar baru 
+maka gambar lama akan dihapus di direktori caranya adlah : 
+
+
+- buka file edit.blade.php dan buat input yang tipe nya hidden dan mempunyai value file image yang ada di database seperti ini 
+contoh code nya : 
+<input type="hidden" name="oldImage" value="{{ $post->image }}"> 
+
+
+
+- buka file dashboardPostController, buka method update berikan code ini didalam pengecekan jika ada gambar yang dikirim melalui file :
+//tambahkan agar dapat mengakses Storage::
+use Illuminate\Support\Facades\Storage;
+
+if ($request->file('image')) {
+
+	    //yang harus ditambahkan
+            if ($request->oldImage) {
+                //storage adalah nama yg diberikan laravel
+                //masuk ke storage dan hapus file yang ada di dir yang bernama sesuai request oldImage
+                Storage::delete($request->oldImage) ;
+            }
+	    akhir 
+
+
+            $validatedData['image'] = $request->file('image')->store('post-images') ;
+}
+
+
+===============================================================================================================================
+
+
+
+menghapus image di direktori ketika data dari post dihapus 
+
+ini harus diperbaiki karena ketika data dihapus image di direktori kita akan ttp ada dan itu juga dapat membuat folder penuh
+
+- buka file dashboardPostController dan buka method destroy , masukan code ini :
+if ($post->image) {
+            Storage::delete($post->image) ;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

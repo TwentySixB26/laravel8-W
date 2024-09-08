@@ -1,0 +1,138 @@
+memperbaiki halaman category
+
+yang akan diperbaiki adalah isi dari blog,category dan author karena ketiganya memiliki komponen yang sama oleh sebab itu sangat tidak efisien jika dibuat 
+satu satu akan mempengaruhi fleksibilitas kinerjanya. dan semuanya akan dibuat di file blog :
+
+
+1. buka file web.php dan ganti code ini :
+
+Route::get('/categories/{category:slug}' , function(Category $category){
+	return view('blog',[
+		'title' => "Post By category : $category->name" , 
+		'blogs' => $category->posts,  
+	]) ;
+}) ;
+
+
+Route::get('/authors/{user:username}' , function(User $user){
+	return view('blog' , [
+        'title' => 'Post By author : $user->name' ,
+        'blogs' => $user->posts
+    ]) ;
+}) ;
+
+
+
+2. masuk ke PostController.php dan gantikan codenya dengan ini :
+
+public function index(){
+        return view('blog',[
+            "title" => "All Post", 
+            // "blogs" => Post::all() 
+            "blogs" => Post::latest()->get()  
+        ]);
+    }
+
+
+
+3. simpen/ganti title di halaman heading, buka folder view dan buka file blog.blade.php simpan diatas/sebelum looping :
+<h1 class="mb-5"> {{ $title }}  </h1>
+
+
+4. succes 
+
+5. Delete file catogory.blade.php yang ada di folder view 
+
+
+
+====================================================================================
+
+N+1 Problem
+
+tapi ketika melakukan hal tersebut akan terjadi N+1 Problem apa itu?
+N+1 problem adalah istilah yang digunakan untuk menggambarkan pola query database yang tidak efisien, di mana satu query utama dijalankan untuk 
+mendapatkan sejumlah data, dan kemudian N query tambahan dijalankan dalam sebuah loop untuk mendapatkan data terkait.
+
+ini dapat terjadi ketika kita mempunyai data dan kita melooping data tersebut atau memanggil data kita akan berulang ulang terus
+
+
+cara mengetahui berapa banyak query kita yang dipanggil berulang kali dapat mengunakan clockwork dengan cara menginstalnya terlebih dahulu.
+Cara install cloakwork:
+
+1. buka terminal dan install
+composer require itsgoingd/clockwork
+
+
+2. install ekstensinya didalam browser. jika mengunakan mozila dan chrome maka akan tersedia tulis saja di ekstensinya yaitu :
+Clockwork
+
+3. install dan pasang 
+
+
+
+Cara pakai Clockwork adalah :
+1. buka web yang dibuat dengan php 
+
+2. klik kanan dan inspect 
+
+3. cari di paling atas ada logo >> cari menu Clockwork 
+
+4. Clockwork succes 
+
+
+
+
+============================================================================================
+
+
+Eager Loading
+
+adalah teknik untuk memuat data terkait dari database dalam satu query yang efisien. Tujuan utama dari eager loading adalah 
+untuk menghindari N+1 query problem, di mana banyak query yang tidak perlu dijalankan secara berulang.
+
+Cara mengunakanya :
+
+1. buka file PostController 
+
+2. ganti codingan sebelumnya atau bisa di komentari dan tambahkan code ini 
+"blogs" => Post::with(['user', 'category'])->latest()->get()  		// jika lebih dari satu 
+"blogs" => Post::with('user')->latest()->get()  			//jika hanya satu 
+
+
+3. succes 
+
+
+
+tapi itu baru yang bagian post belum authors dan category 
+pada kedua tersebut mengunakan perbandingan jadi tidak bisa langsung mengunakan seperti diatas (with) pendekatanya berbeda caranya yaitu mengunakan 
+lazy eager loading dan caranya adalah :
+
+1. buka file web.php dan ganti code sebelumnya dengan code ini 
+Route::get('/authors/{user:username}' , function(User $user){
+	return view('blog' , [
+        'title' => 'user Post' ,
+        'blogs' => $user->posts->load('category' , 'user')	//ini yang berubah 
+    ]) ;
+}) ;
+
+
+Route::get('/categories/{category:slug}' , function(Category $category){
+	return view('category',[
+		'title' => $category->name , 
+		'posts' => $category->posts->load('category' , 'user'),
+		'category' => $category->name
+	]) ;
+}) ;
+
+
+
+
+
+
+
+
+
+
+
+
+

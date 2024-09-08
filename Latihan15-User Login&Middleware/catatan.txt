@@ -1,0 +1,272 @@
+Pembahasan:
+
+Auth 
+adalah salah satu komponen utama untuk mengelola autentikasi pengguna. Fungsinya mencakup berbagai 
+aspek terkait pengelolaan sesi pengguna, login, logout, registrasi, dan kontrol akses.
+
+
+Auth::attempt()		: 
+Mencoba login pengguna dengan kredensial yang diberikan.
+Kredensial adalah informasi yang digunakan untuk memverifikasi identitas seseorang seperti username dan password,token dll. 
+
+
+intended 
+dalam Laravel digunakan untuk mengarahkan pengguna ke halaman tujuan yang diharapkan setelah mereka berhasil login. 
+Biasanya, ini digunakan ketika pengguna mencoba mengakses halaman yang memerlukan autentikasi, dan setelah mereka berhasil login, 
+mereka akan diarahkan kembali ke halaman yang ingin mereka akses sebelumnya. 
+contohnya seperti ini :
+jika kita mengakses link "onclass.ump.ac.id/home/class/pemograman%web%lanjut" tapi sebelum masuk kedalam situ diharuskan login terlebih dahulu
+jika login nya sukses tidak mengarah ke "onclass.ump.ac.id/home" tapi langsung ke "onclass.ump.ac.id/home/class/pemograman%web%lanjut"
+
+
+regenerate() 
+digunakan untuk menghindari hacking yang bernama session fixation yaitu masuk ke dalam celah keamanan dengan mengunakan 
+session palsu. atau pengertian lainya adalah :
+metode yang sering digunakan untuk memperbarui session ID pengguna. Ini penting untuk mencegah serangan jenis session fixation, 
+di mana penyerang mencoba memanfaatkan session ID yang diketahui atau tetap untuk mengambil alih sesi pengguna yang sah.
+
+
+back()
+metode yang digunakan untuk mengarahkan pengguna kembali ke halaman sebelumnya. Biasanya, ini digunakan setelah suatu tindakan dilakukan, 
+seperti pengisian formulir yang gagal atau setelah penyimpanan data berhasil, sehingga pengguna bisa kembali ke halaman tempat mereka sebelumnya berada.
+
+Middleware() 
+pada Laravel adalah lapisan pemrosesan yang berada di antara permintaan HTTP dan aplikasi Anda. Middleware digunakan untuk memeriksa 
+dan memfilter permintaan HTTP yang masuk sebelum mencapai controller.
+
+
+
+Auth dan guest 
+- auth akan berjalan jika user sudah terotentikasi dan login 
+@auth 
+	//isi 
+@endauth 
+digunakan didalam tag tag html jika ingin menampilkan tag html apa saja yang akan tampil jika sudah otentikasi/login 
+
+
+- guest akan berjalan jika user masih menjadi tamu/belum login 
+@guest 
+	//isi 
+@endguest
+digunakan didalam tag tag html jika ingin menampilkan tag tag html apa saja yang akan tampil jika user belum otentikasi/belum login 
+
+bisa juga digunakan dua duanya :
+@auth 
+	//jika sudah otentikasi 
+@else 
+	//jika belum otentikasi
+@endauth     
+
+
+
+
+
+
+auth()->user()->name
+ini adalah fungsi yang dimiliki laravel, jika sudah login maka data akan otomatis tersimpan didalam session jika mengunakan php biasa
+inilah yang menyebebabkan data bisa langsung terbaca tanpa menyimpanya kedalam session. kita bisa langsung mengambil semua isi data 
+dari yang login.auth adalah ketika kita telah melakukan otentikasi makanya kita bisa mengunakanya user itu nama models yang  
+berhubungan dengan table users pada databse dan name itu nama field dari table users
+
+==============================================================================================================
+
+
+
+untuk membuat route dan method sama seperti register, dan untuk menjalankan validasinya adalah contohnya seperti ini:
+public function authenticate(Request $request){
+        $request->validate([
+            'email' => 'required|email:dns' , 
+            "password" => 'required'
+        ]) ;
+
+        dd('sukses!') ;  //jika lolos validasi akan menampilkan ini 
+    }
+
+
+========================================================================================================
+
+
+membuat fungsi ketika data ketika gagal divalidasi menggunakan 
+@error('email')  is-invalid @enderror //disimpan diclass pada input,sama seperti register digunakan untuk membuat border menjadi merah
+
+//untuk menampilkan pesan ketika eror
+@error('email') 
+     <div class="invalid-feedback">
+           {{ $message }}
+      </div>
+@enderror
+
+
+=============================================================================================
+
+
+otentikasi
+mengecek data yang sudah valid telah terdaftar di database belum 
+
+- simpan fungsi yang melakukan autentikasi ke dalam variabel  $credentials , nama nya bebas 
+contoh pengunaan code di dalam method authenticate:
+$credentials = $request->validate([
+            'email' => 'required|email:dns' , 
+            "password" => 'required'
+        ]) ;
+
+
+
+- data yang lolos validasi akan masuk ke code ini untuk di cek apakah ada data yg dikirim ada
+didalam database atau tidak :
+if (Auth::attempt($credentials)) {
+      $request->session()->regenerate();
+      return redirect()->intended('/dashboard');
+}
+ 
+
+
+- jika data gagal, atau data tidak ada di database :
+return back()->with('loginError' , 'Login gagal, silahkan cek kembali!');  
+dan hapus 
+dd('sukses!') ; 
+maka akan mengembalikan fungsi yang mirip seperti flash,pada latihan sebelumnya 
+
+
+
+- alert yang digunakan ketika data eror/ data gagal login :
+@if(session()->has('loginError'))
+         <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('loginError') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+         </div>
+@endif
+
+
+
+
+==============================================================================================================
+
+
+membuat dashboard : 
+
+- Klik CTRL+SHIFT+P cari make:controller dan beri nama DashboardController 
+
+- buka file DashboardController buat method index yang akan melakukan return ke folder dashboard dan file index:
+public function index(){
+        return view('dashboard.index') ; 
+    }
+
+
+
+- buka folder Views dan buat folder dashboard lalu didalamnya buat file index dan isikan 
+<h1>Wellcome, Bayu aji </h1>
+
+
+- masuk ke route untuk menangkapnya 
+Route::get('/dashboard', [DashboardController::class,'index']);
+
+
+
+=====================================================================================================================
+
+
+menerapkan middelware auth 
+
+contoh gampangnya adalah kita punya dua halaman yaitu login dan dashboard,halaman login hanya akan tampil jika user belum login dan 
+dashboard akan tampil jika user sudah login 
+
+contoh pengunaanya adalah seperti ini,buka sebuah route/ web.php: 
+- halaman login hanya akan tampil jika user belum otentikasi/login 
+Route::get('/login' , [LoginController::class,'index'])->middleware('guest') ;
+
+maka user tidak akan bisa lagi menampilkan lagi halaman login jika sudah login 
+
+
+==================================================================================================================
+
+
+- membuat form login hilang jika sudah login dan memunculkan menu dashboard ketika user sudah login/otentikasi. 
+buka halaman navbar.blade.php :
+<ul class="navbar-nav ms-auto">
+            @auth 
+		 <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        wellcome back, {{ auth()->user()->name }} 
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="/dashboard">  <i class="bi bi-layout-text-sidebar-reverse"></i> My Dashboard</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#"> <i class="bi bi-box-arrow-in-left"></i> Log out</a></li>
+                    </ul>
+                </li>
+            @else 
+                //yang akan tampil jika user belum login 
+                <li class="nav-item">
+                    <a href="/login" class="nav-link {{ Request::path() === 'login' ? 'active' : "" }} ">
+                        <i class="bi bi-box-arrow-right" style="width: 500px"></i> Login 
+                    </a>
+                </li>
+            @endauth
+</ul>
+
+
+
+=====================================================================================================================
+
+
+membuat fungsi logout 
+
+- ganti tampilanya agar logout yg sebelumnya bukan tag a tapi button, yang type nya submit beserta berikan form seperti ini,disimpan pada @auth:
+<form action="/logout" method="post">
+           @csrf 
+           <button type="submit" class="dropdown-item">
+                   <i class="bi bi-box-arrow-in-left"></i> Log out
+           </button>
+</form>
+
+
+
+- tambahkan route loguot 
+Route::post('/logout' , [LoginController::class,'logout']) ;
+
+
+- buka file LoginController dan buat method logout untuk membuat fungsi logika yg sudah disediakan laravel agar logout 
+    
+public function logout() {
+
+        Auth::logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+        return redirect('/');
+    
+    }
+
+itu sudah sepaket jadi tidak usah diganti! akan logout sendir, redirect saja yg ingin diubah jika mau 
+
+ 
+
+==================================================================================================================================
+
+memperbaiki halaman dashboard
+
+kenapa harus diperbaiki? karena kita masih bisa mengakses halaman dashboard walaupun belum login dan itu sangat berbahaya 
+oleh sebab itu harus diperbaiki terlebih dahulu agar hal tersebut tidak terjadi :
+
+
+- buka route nya dan perbaiki code yang lama dengan code ini pada halaman dashboard :
+
+Route::get('/dashboard', [DashboardController::class,'index'])->middleware('auth'); 
+dan juga 
+Route::get('/register' , [RegisterController::class,'index'])->middleware('guest') ;
+
+
+- tapi jika mengakses dashboard nya langsung sekarang akan terjadi eror yaitu Route [login] not defined. karena defaultnya
+jika kita mengakses halaman tersebut dan membutuhkan otentikasi dulu maka akan diarahkan ke halaman yang mempunyai name login
+sedangkan kita belum punya, sebabnya kita harus membuat name nya menjadi login dulu pada codingan route kita yaitu seperti ini :
+
+Route::get('/login' , [LoginController::class,'index'])->name('login')->middleware('guest') ;
+
+
+
+
+
+
+
+
+

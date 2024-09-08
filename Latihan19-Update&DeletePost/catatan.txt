@@ -1,0 +1,176 @@
+PEMBAHASAN :
+
+@method('delete')
+code tersebut disimpan didalam tag form agar laravel tau yang ingin kita lakukan pada form
+tersebut adalah delete. 
+
+
+
+
+
+
+
+
+
+
+===================================================================================================================
+
+
+membuat fitur delete :
+
+- buka folder dashboard/index.blade.php
+
+
+
+- untuk membuat fitur delete tidak bisa mengunakan link/href karena membutuhkan form oleh sebab itu codingan sebelumnya akan
+direvisi atau diubah dengan code ini :
+
+<form action="/dashboard/posts/{{ $post->slug }}" method="post" class="d-inline">
+         @method('delete')
+         @csrf 
+        <button class="badge bg-danger border-0" onclick="return confirm('Are you delete this post?')"> 
+		<span data-feather="x-circle"></span> 
+	</button>
+</form>
+
+
+
+
+
+- buka file dashboardPostController dan masukan code ini di method destroy:
+public function destroy(Post $post)
+    {
+        Post::destroy($post->id) ; 
+        return redirect('/dashboard/posts')->with('success', 'post telah sukses dihapus') ;
+        
+    }
+
+
+
+
+====================================================================================================================================
+
+
+membuat halaman edit 
+
+- untuk edit bisa mengunakan href cotohnya seperti pada code ini :
+<a href="/dashboard/posts/{{ $post->slug }}/edit" class="badge bg-warning"><span data-feather="edit"></span></a>
+
+/edit  itu sudah default nya yang telah diberikan oleh laravel,jadi wajib dibawa
+
+
+
+
+- buka file dashboardPostsController dan masukan code ini pada method edit :
+public function edit(Post $post)
+    {
+        return view('dashboard.posts.edit',[
+            'post' => $post , 
+            'categories' => Category::all()
+        ]) ; 
+    }
+
+fungsi dari edit sendiri adalah hanya untuk mengedit, kwtika sudah diedit maka akan dikirimkan ke update untuk di kirim 
+ke dalam database
+
+
+
+
+- buat file untuk menangkap view di method edit, kita beri nama edit.blade.php
+
+a. pada action berikan {{ $post->slug }} agar mengidentifikasikan slug mana yang ingin dilakukan :
+<form method="post" action="/dashboard/posts/{{ $post->slug }}"> 
+
+</form>
+
+
+b. berikan juga code ini didalam form :
+@method('put')
+@csrf 
+
+
+c. pada value di tiap tiap input juga berikan ini,ingat disetiap input! :
+value="{{ old('title',$post->title) }}"
+
+jadi jika user baru masuk ke edit maka yang akan ditampilkan $post->title atau title yang sudah ada di database 
+tapi jika user telah mengisi title yang baru dan mengklik submit padahal ada form yg masih kosong data yang telah di isi
+tidak akan direset ulang atau akan menampilkan data yang sudah di isi 
+
+
+d. contoh full code(hanya satu input) : 
+
+<form method="post" action="/dashboard/posts/{{ $post->slug }}">
+        @method('put')
+        @csrf 
+
+        {{-- title  --}}
+        <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" class="form-control @error('title') is-invalid @enderror" id="title" name="title" required autofocus value="{{ old('title', $post->title) }}">
+            @error('title') 
+                <div id="" class="invalid-feedback">
+                    {{ $message }}
+                </div>
+            @enderror 
+        </div>
+        {{-- akhir title  --}}
+
+
+        {{-- category  --}}
+        <div class="mb-3">
+            <label for="category" class="form-label">Category</label>
+            <select class="form-select" name="category_id">
+                @foreach( $categories as $category )
+                    @if(old('category_id', $post->category_id) == $category->id)
+                        <option value="{{ $category->id }}" selected>{{ $category->name }}</option>
+                    @else 
+                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    @endif
+                @endforeach
+            </select>        
+        </div>
+        {{-- akhir category --}}
+
+
+    <button type="submit" class="btn btn-primary">Edit Post</button>
+    </form>
+
+
+
+====================================================================================================================================
+
+
+memperbaiki validasi slug dan mengirim update ke database 
+
+problemnya adalah,ketika kita mengedit data maka slug akan terjadi bentrok eror yaitu mengangap slug harus diperbaharui karena harus 
+unique dan jika sudah masuk ke database maka slug itu tidak akan bisa dipakai lagi maupun edit sekalipun, oleh sebab itu maka akan 
+dibuat slug nya agar lolos validasi jika slug nya tidak diedit, tapi jika slugnya diedit maka harus dicek ke validasi terlebih dahulu.
+caranya adalah :
+
+- buka file dashboardPostController dan masuk ke method update dan berikan code ini : 
+$rules = [
+            'title' => 'required|max:255', 
+            'category_id' => 'required',
+            'body' => 'required'
+        ] ; 
+
+	// jadi di cek terlebih dahulu slug yang dikirim ada tidak di database,jika ada langsung lolos kan tanpa 
+	// melakukan validasi 
+        if($request->slug != $post->slug) {
+            $rulus["slug"] = 'required|unique:posts' ;
+        }
+
+
+
+- lakukan update pada data, masih sama yaitu di method update :
+$validatedData = $request->validate($rules) ; 
+
+        $validatedData['user_id'] = Auth::user()->id ; 
+        $validatedData['excerpt'] = Str::limit(strip_tags($request->body) , 100);
+
+        Post::where('id' , $post->id )  
+                ->update($validatedData) ; 
+
+        return redirect('/dashboard/posts')->with('success', 'Data berhasil didiupdate') ;
+
+

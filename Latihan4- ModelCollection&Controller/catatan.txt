@@ -1,0 +1,64 @@
+1. Model 
+sebuah class yang digunakan untuk mengelola tabel didalam database (update,delete,insert,view,menampilkan).
+
+Cara membuat model ada beberapa cara :
+- cara manual dengan cara masuk ke folder app/models dan buat file nya disitu
+- atau dengan cara mengunakan terminal dan menuliskan perintah nya seperti :
+  php artisan make:model -m Post
+- mengunakan ekstensi laravel artisan dengan cara tekan (CTRL+SHIFT+P) dan akan muncul pilihan diatas vscode 
+dan cari make model
+
+
+
+
+
+2. Collection 
+Pembungkus untuk sebuah array yang akan membuat array lebih overpower(sakti) 
+kenapa musti pakai collect? agar array bisa dijadikan sebuah fungsi yang ada di php salah satunya adalah :
+average, avg, collapse,first ,firstWhere dan lain lain 
+
+Cara mengunakan : 
+collect(array_yang_ingin_dijadikan_collect)
+
+
+
+
+
+3. Controllers 
+componen yang bertindak sebagai penghubung antara model (data) dan view (antarmuka pengguna).
+
+Fungsi Utama: 
+Controller menerima input dari pengguna (misalnya, melalui formulir atau URL), memprosesnya, dan kemudian menentukan tindakan yang sesuai. 
+Controller ini mengakses model untuk mengambil, menyimpan, atau memperbarui data yang diperlukan, dan akhirnya memilih tampilan yang tepat 
+untuk menampilkan data tersebut kepada pengguna.
+
+
+Pengolahan Logika Bisnis: 
+Controller mengelola logika bisnis aplikasi. Misalnya, jika pengguna mengirimkan formulir untuk membuat akun baru, 
+Controller akan memvalidasi data formulir, memanggil Model untuk menyimpan data pengguna baru, dan kemudian menentukan tampilan yang sesuai untuk 
+memberi tahu pengguna apakah pendaftaran berhasil atau tidak.
+
+tempat penyimpanan controlers :
+App\Http\Controllers\Controller
+
+cara membuat controlers :
+-  mengunakan ekstensi laravel artisan dengan cara tekan (CTRL+SHIFT+P) dan akan muncul pilihan diatas vscode 
+dan cari make controllers
+- bisa juga dengan cara mengetikan di terminal : 
+php artisan make:controller NamaController
+
+php artisan make:controller ProvisionServer --invokable 
+// saat Anda hanya membutuhkan satu aksi atau logika dalam controller tersebut, seperti menjalankan satu tugas tertentu, misalnya 
+provisioning server, mengirim email, atau tugas lain yang berdiri sendiri.
+
+
+
+
+
+
+
+
+
+
+
+

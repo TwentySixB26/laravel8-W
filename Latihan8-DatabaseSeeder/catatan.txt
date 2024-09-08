@@ -1,0 +1,179 @@
+apa itu seeding? seeding adalah proses memasukkan data awal (dummy atau default) ke dalam database. 
+
+cara memanggil :
+php artisan make:seeder UserSeeder(nama seeder anda)
+
+cara menjalankan : 
+php artisan db:seed
+php artisan db:seed --class=UserSeeder //hanya beberapa yang dipanggil 
+
+=========================================================
+
+
+menambahkan link author :
+
+1. buka file blog.blade.php dan isikan code :
+<p> Website by Bayu aji |      
+    <a href="/categories/{{ $blog->category->slug }}" class="text-decoration-none"> {{ $blog->category->name }} </a>
+</p>
+
+2. hubungkan table user dengan table post,caranya adalah masuk ke file .....create_posts_table.php dan masukan code:
+$table->foreignId('user_id') ;
+
+3. lakukan migration ulang di terminal :
+php artisan migrate:fresh 
+
+4. akan mengunakan seeding agar tidak mengisi manual berkali kali seperti sebelumnya 
+
+5. masuk ke folder seeders dan buka file DatabaseSeeder.php 
+
+// =============== tapi ini mengunakan data random ==============
+6. buka cooment code ini :
+// User::factory(10)->create();
+
+7. jalankan : 
+php artisan db:seed
+
+
+8. akan tampil data palsu yang ada di tabel user secara acak dibuatkan oleh laravel
+
+
+==================================================
+
+
+seeding dengan data yang kita mau :
+
+
+1.  masuk ke folder seeders dan buka file DatabaseSeeder.php 
+
+2. panggil Models User,category dan Post :
+use App\Models\User;
+use App\Models\Post;
+use App\Models\Category;
+
+3. tambahkan code ini untuk menambahkan kedalam table, code ini ditulis file DatabaseSeeder.php :
+User::create([
+	'name' => 'Bayu aji' , 
+	'email' => 'bayuahi@gmail.com' , 
+	'password' => bcrypt('12345')
+])
+
+
+Category::create([
+	'name' => 'Web Progaming',
+	'slug' => 'web-progaming'
+])
+
+Category::create([
+	'name' => 'Personal',
+	'slug' => 'personal'
+])
+
+Category::create([
+	'name' => 'Web Progaming',
+	'slug' => 'web-progaming'
+])
+
+Post::create([
+	'title' => 'judul pertama',
+	'slug' => 'judul-pertama',
+	'excerpt' => 'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Hic alias dolorem rerum dolore non veniam, deleniti nihil molestiae odio 
+			ut doloribus ex similique quam libero numquam aperiam reprehenderit eligendi ratione soluta',
+	'body' => '<p> Lorem, ipsum dolor sit amet consectetur adipisicing elit. Hic alias dolorem rerum dolore non veniam, deleniti nihil molestiae 
+			odio ut doloribus ex similique quam libero numquam aperiam reprehenderit eligendi ratione soluta id. </p> <p>Vel sint facilis in 
+			ullam nihil corrupti maxime, laboriosam deserunt. Non tempora, repellat temporibus quisquam quam accusantium sint maiores aperiam
+			itaque adipisci sapiente dolor aliquam sit fugiat exercitationem deleniti esse! Cumque in ipsam rem nisi aspernatur? 
+			Similique temporibus repellendus ducimus magnam magni dicta vel dolor beatae eum ex, sapiente provident facilis velit atque 
+			deserunt incidunt amet, mollitia numquam tempore </p> <p> voluptates qui. Perspiciatis eos placeat distinctio rem saepe 
+			voluptatem provident dolorem, ea ad qui in ut alias quo facere iure facilis laudantium vel ullam illo libero officia explicabo 
+			maxime praesentium eum! Nam dolore accusantium iusto est molestias hic corrupti.</p>',
+	'category_id' => 1 , 
+	'user_id' => 1
+])
+
+
+Post::create([
+	'title' => 'judul kedua',
+	'slug' => 'judul-kedua',
+	'excerpt' => 'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Hic alias dolorem rerum dolore non veniam, deleniti nihil molestiae odio 
+			ut doloribus ex similique quam libero numquam aperiam reprehenderit eligendi ratione soluta',
+	'body' => '<p> Lorem, ipsum dolor sit amet consectetur adipisicing elit. Hic alias dolorem rerum dolore non veniam, deleniti nihil molestiae 
+			odio ut doloribus ex similique quam libero numquam aperiam reprehenderit eligendi ratione soluta id. </p> <p>Vel sint facilis in 
+			ullam nihil corrupti maxime, laboriosam deserunt. Non tempora, repellat temporibus quisquam quam accusantium sint maiores aperiam
+			itaque adipisci sapiente dolor aliquam sit fugiat exercitationem deleniti esse! Cumque in ipsam rem nisi aspernatur? 
+			Similique temporibus repellendus ducimus magnam magni dicta vel dolor beatae eum ex, sapiente provident facilis velit atque 
+			deserunt incidunt amet, mollitia numquam tempore </p> <p> voluptates qui. Perspiciatis eos placeat distinctio rem saepe 
+			voluptatem provident dolorem, ea ad qui in ut alias quo facere iure facilis laudantium vel ullam illo libero officia explicabo 
+			maxime praesentium eum! Nam dolore accusantium iusto est molestias hic corrupti.</p>',
+	'category_id' => 1 , 
+	'user_id' => 1
+])
+
+Post::create([
+	'title' => 'judul ketiga',
+	'slug' => 'judul-ketiga',
+	'excerpt' => 'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Hic alias dolorem rerum dolore non veniam, deleniti nihil molestiae odio 
+			ut doloribus ex similique quam libero numquam aperiam reprehenderit eligendi ratione soluta',
+	'body' => '<p> Lorem, ipsum dolor sit amet consectetur adipisicing elit. Hic alias dolorem rerum dolore non veniam, deleniti nihil molestiae 
+			odio ut doloribus ex similique quam libero numquam aperiam reprehenderit eligendi ratione soluta id. </p> <p>Vel sint facilis in 
+			ullam nihil corrupti maxime, laboriosam deserunt. Non tempora, repellat temporibus quisquam quam accusantium sint maiores aperiam
+			itaque adipisci sapiente dolor aliquam sit fugiat exercitationem deleniti esse! Cumque in ipsam rem nisi aspernatur? 
+			Similique temporibus repellendus ducimus magnam magni dicta vel dolor beatae eum ex, sapiente provident facilis velit atque 
+			deserunt incidunt amet, mollitia numquam tempore </p> <p> voluptates qui. Perspiciatis eos placeat distinctio rem saepe 
+			voluptatem provident dolorem, ea ad qui in ut alias quo facere iure facilis laudantium vel ullam illo libero officia explicabo 
+			maxime praesentium eum! Nam dolore accusantium iusto est molestias hic corrupti.</p>',
+	'category_id' => 2 , 
+	'user_id' => 1
+])
+
+
+
+4. php artisan db:seed
+
+5. data succes dan akan masuk 
+
+6. jika data di atas sudah masuk ke table, tapi kita ingin menambahkan data lagi seperti di atas harus mengunkan :
+php artisan migrate:fresh --seed
+//data akan dihapus di dalam db dan akan ditambahkan kembali jdi kita tidak perlu menuliskan dua kali yaitu php migrate dan artisan db:seed, 
+
+//jika mengunakan php artisan db:seed maka data yang sudah masuk ke database akan masuk kembali jadi akan terjadi duplicat data,jika ingin mengunakan 
+//db:seed harus dihapus dulu data yang sudah masuk atau dikomentari 
+
+===================================================================
+
+jalankan author sesuai yang ada di dalam database 
+
+1. buka file blog.blade.php dan edit code seperti ini :
+<p> Website by <a href=""> {{ $blog->user->name }}</a> |      
+    <a href="/categories/{{ $blog->category->slug }}" class="text-decoration-none"> {{ $blog->category->name }} </a>
+</p>
+
+2. masuk ke folser models dan file Post buat function yang menghubungkanya ke table user:
+public function user(){
+        return $this->belongsTo(User::class) ; 
+} 
+
+
+3. pada file Post.php tadi tulis juga code :
+use App\Models\User;
+
+
+4. masuk ke folder models dan file User dan buat method baru:
+ public function posts(){
+        return $this->hasMany(Post::class) ; 
+    } 
+
+
+5. pada file user.php tadi tulis juga code :
+use App\Models\Post;
+
+
+6. masuk file Details.blade.php dan perbaiki codenya :
+
+<p>  Website by <a href=""> {{ $posts->user->name }}</a> |          
+            <a href="/categories/{{ $posts->category->slug }}" class="text-decoration-none"> {{ $posts->category->name }} </a>
+</p>
+
+
+
+

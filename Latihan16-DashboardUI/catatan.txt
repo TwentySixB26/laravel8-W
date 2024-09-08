@@ -1,0 +1,145 @@
+PEMBAHASAAN :
+
+Resource controller 
+pada Laravel adalah jenis controller yang menyediakan metode default untuk mengelola operasi CRUD (Create, Read, Update, Delete)
+pada resource tertentu. Laravel memberikan cara mudah untuk menghasilkan controller ini dengan menggunakan perintah Artisan.
+
+Resource controller memiliki tujuh metode utama yang secara otomatis dihasilkan oleh Laravel. Berikut adalah metode-metode tersebut beserta fungsinya:
+1. index - Menampilkan daftar resource.
+2. create - Menampilkan form untuk membuat resource baru.
+3. store - Menyimpan resource baru ke dalam database.
+4. show - Menampilkan resource tunggal berdasarkan ID.
+5. edit - Menampilkan form untuk mengedit resource yang sudah ada.
+6. update - Memperbarui resource yang ada di database.
+7. destroy - Menghapus resource dari database.
+
+
+
+
+
+$loop->iteration
+digunakan didalam foreach, fungsi untuk melooping angka dimulai dari angka 1
+
+
+
+
+
+getRouteKeyName 
+digunakan untuk menentukan kunci yang akan digunakan saat mengikat model ke rute atau ketika model dimuat menggunakan metode route model
+binding. Secara default, Laravel menggunakan kolom id dari tabel sebagai kunci utama ketika mencari model berdasarkan parameter 
+rute. Namun, dengan getRouteKeyName, Anda dapat mengubah kolom yang digunakan untuk pencarian tersebut.
+
+
+
+====================================================================================================
+
+Membuat halaman My Posts (Resource Controller)
+
+- cara membuat resource controller berbeda dengan controller biasa caranya adalah :
+A. php artisan make:controller NamaController --resource
+B. (CTRL+SHIFT+P), make:controller , NamaController , pilih resource, pilih agar terhubung ke model mana 
+C. php artisan make:controller PhotoController --model=Photo --resource //agar langsung terhubung ke dalam model yang mana 
+
+
+====================================================================================================
+
+Membuat route 
+
+- ketika sudah teinstal / membuat file resource DashboardPostController maka kita harus membuat sebuah route nya agar 
+controller yang sudah diinstal/buat dapat digunakan: 
+Route::resource('/dashboard/posts', DashboardPostController::class)->middleware('auth');
+
+//bukan mengunakan post/get tapi resource karena itu dibuat mengunakan resource bukan basic  
+
+
+jika sudah membuat route di resource,akan otomatis tehubung ke index() yang ada di dashboardpostController, maka jika 
+ingin melakukan view,disitulah tempatnya. 
+
+
+
+
+===================================================================================================================
+
+
+menampilkan post detail 
+
+untuk menampilkan post detail dapat mengunakan id karena defaultnya id. jika anda mengarahkan link yang memberikan id dari suatu data tersebut
+maka otomatis akan menjalankan route nya tanpa melakukan route ulang, contohnya seperti ini : 
+
+- jika anda mengklik logo mata/ detail maka akan mengarahkan ke link /dashboard/posts/{{ $post->id }} karena anda mengakses id tersebut maka 
+anda dapat menampilkan detail/isi keseluruhan post tersebut. 
+
+
+
+- untuk mengelolanya/menangkap apa yg ingin anda lakukan terhadap halaman tersebut anda harus masuk ke file DashboardpostController dengan method:
+public function show(Post $post)
+    {
+        return $post ; 
+    }
+
+maka disitulah anda bisa mengakses tiap detai apa yg ingin dilakukan, asal yang anda akses itu id walaupun kita tidak melakukan route karena
+sudah dilakukan oleh resource route 
+
+
+
+
+- bagaimana jika yang ingin diakses berdasarkan slug bukan id? maka harus merubah defaultnya slug bukan id,caranya adalah mengunakan  
+getRouteKeyName seperti ini:
+
+buka file Post.php yanng ada difolder models,kena post? karena ketika membuatnya kita dihubungkan dengan post model pada bab ini dibuat paling atas
+simpan code ini di post.php :
+ public function getRouteKeyName()
+    {
+        return 'slug';
+    }
+
+maka defaultnya yg tadinya id akan berubah menjadi slug 
+
+ganti juga menjadi slug pada tag ini yang ada di index.blade.php pada folder dashboard.posts : 
+<a href="/dashboard/posts/{{ $post->slug }}" class="badge bg-primary"><span data-feather="eye"></span></a>
+
+
+- ubah juga method show yang ada di DashboardPostController :
+public function show(Post $post)
+    {
+        return view('dashboard.posts.show', [
+            'post' => $post 
+        ]) ; 
+    }
+
+
+
+
+- dan ini untuk isi dari view dashboard.posts.show :
+@extends('dashboard.layouts.main') 
+
+@section('container')
+<div class="container">
+    <div class="row my-3">
+        <div class="col-lg-8">
+            <h1> {{ $post->title }} </h1>
+            <p> Website by <a href="/blog?author={{ $post->user->username }}" class="text-decoration-none"> {{ $post->user->name }}</a> |          
+                <a href="/blog?category={{ $post->category->slug }}" class="text-decoration-none"> {{ $post->category->name }} </a>
+            </p>
+            <img src="/img/{{ $post->category->name }}.jpg"  alt="img/{{ $post->category->name }}.jpg" class="img-fluid">
+
+            <article class="my-3 fs-5">
+                <p>{!! $post->body  !!}</p>
+            </article>
+
+
+            <a href="/blog"> kembali ke blog</a>
+
+        </div>
+    </div>
+</div>
+@endsection
+
+
+
+
+
+
+
+
+

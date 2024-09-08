@@ -1,0 +1,117 @@
+1. Blade teamplating 
+Cara pengunaan :
+
+Route::get('/', function () {
+    return view('welcome', ['name' => 'Samantha']);
+});
+
+Cara pemangilan samantha,tidak perlu mengunakan <?Php echo $nama ?> tapi bisa mengunakan 
+Hello, {{ $name }}. //mengunakan {{}} (double kurung kurawal)
+
+
+
+=========================================================================================================================
+
+
+2. Layouting Teamplate 
+jika kita ingin membuat hal yangg sama setiap halaman,contohnya adalah navbar dan pada setiap halaman bentuk navbar tersebut akan dibuat sama 
+maka tidak efektif jika membuat navbar nya pada setiap file karena jika kita mengubah salah satu maka harus mengubah nya semua, tetapi jika mengunakan
+layouting teamplate maka akan lebih efektif dan hanya perlu mengubah file utamanya saja maka halaman lain akan ikut berubah. 
+
+A. Layouts (exntend,section dan Yield)	 
+@yield  :
+pada Laravel digunakan untuk menentukan bagian dari template yang dapat diisi dengan konten spesifik dari file blade lain 
+yang meng-extend template tersebut.
+yield digunakan pada file utama atau parent
+
+@extends :
+digunakan didalam child atau anaknya, ini berfungsi agar kita mengetahui mau dijadikan anak dimana atau extends kemana.
+harus mempunyai nama yang sesuai dengan nama file nya yang dijadikan parent
+
+@section :
+digunakan di dalam child atau anaknya, ini berfungsi untuk mengetahui mau diletakan dimana bagian mana file tersebut akan digunakan dan harus 
+mempunyai nama yang sesuai dengan yield 
+
+contoh pengunaan/struktur : 
+
+==== layouts/fileUtama.php ====
+<navbar>
+	@yield( 'nama'(bebas) ) 
+<footer>
+========================
+
+
+==== file1.php ====
+@extends('layouts.fileUtama')
+
+@section('nama') 	//navbar di fileUtama.php
+	<isi/file1.php>
+@endsection 		//navbar di fileUtama.php
+=============================
+
+
+==== file2.php ====
+@extends('layouts.fileUtama')
+
+@section('nama')  	//navbar di fileUtama.php
+	<isi/file2.php>
+@endsection 		//footer di fileUtama.php
+===============================
+
+jadi jika kita ingin merubahnya, maka harus merubahnya dihalaman utama saja 
+
+
+
+B. Partials (include) 
+untuk menyimpan bagian bagian spesifik didalam sebuah halaman yang akan dianggap sebagai komponen,misalnya kita ingin membuat halaman tersebut di fileA ada
+tapi di fileB tidak ada 
+
+@include : 
+digunakan untuk menyertakan file Blade lain ke dalam tampilan yang sedang Anda kerjakan. Ini mirip dengan fungsi include di PHP, memungkinkan Anda
+ untuk membagi template menjadi bagian-bagian yang lebih kecil dan dapat digunakan kembali.  
+
+	Perbedaan Utama Antara @include dan @yield:
+	1. Tujuan Penggunaan:
+		@yield: Digunakan dalam template utama untuk menentukan tempat di mana konten khusus dari child views akan ditempatkan.
+		@include: Digunakan untuk menyisipkan konten dari file lain ke dalam template saat ini.
+
+	2. Hierarki Template:
+		@yield dan @section bekerja dalam sistem template inheritance di mana satu file Blade meng-extend yang lain.
+		@include hanya menyisipkan file lain dan tidak memiliki konsep inheritance.
+
+	3. Konteks Penggunaan:
+		@yield biasanya digunakan di layout utama, sementara @include bisa digunakan di mana saja untuk menyisipkan bagian-bagian 
+		kecil dari tampilan yang digunakan berulang-ulang.
+
+
+Contoh pengunaan :
+==== layouts/fileUtama.php ====
+@include('partials.navbar') 	//diambil dari file navbar.php
+	@yield( 'nama'(bebas) ) 
+<footer>
+========================
+
+
+===== partials/navbar.php =========
+<navbar>
+==============
+
+
+
+
+
+
+
+=========================================================================================================================
+
+3. Simulasi blog posts
+slug :
+pada Laravel digunakan untuk membuat URL yang ramah mesin pencari (SEO-friendly) dengan mengubah teks menjadi format yang lebih
+ mudah dibaca oleh manusia dan lebih mudah diakses oleh mesin pencari.
+
+Slug biasanya dihasilkan dengan:
+A. Mengubah semua karakter menjadi huruf kecil.
+B. Menghapus atau mengganti karakter non-alfanumerik dengan tanda hubung -.
+C. Menghilangkan spasi atau menggantinya dengan tanda hubung -.
+
+
